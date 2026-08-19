@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>Car Escape</title>
+
+<style>
+
+    #controls{
+    position:fixed;
+    bottom:20px;
+    width:100%;
+    text-align:center;
+}
+
+#controls button{
+    font-size:30px;
+    padding:20px;
+    margin:10px;
+}
+body{
+    margin:0;
+    overflow:hidden;
+    background:#111;
+}
+
+canvas{
+    display:block;
+    margin:auto;
+    background:#228B22;
+}
+</style>
+</head>
+<body>
+<div id="controls">
+    <button id="left">⬅️</button>
+    <button id="right">➡️</button>
+</div>
+<canvas id="game" width="800" height="600"></canvas>
+
+<script>
+
+document.getElementById("left").ontouchstart = function(){
+    keys["a"] = true;
+};
+
+document.getElementById("left").ontouchend = function(){
+    keys["a"] = false;
+};
+
+document.getElementById("right").ontouchstart = function(){
+    keys["d"] = true;
+};
+
+document.getElementById("right").ontouchend = function(){
+    keys["d"] = false;
+};
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let score = 0;
+let gameOver = false;
+
+const player = {
+    x:370,
+    y:450,
+    width:60,
+    height:100,
+    speed:8
+};
+
+const enemy = {
+    x:370,
+    y:-120,
+    width:60,
+    height:100,
+    speed:5
+};
+
+const keys = {};
+
+window.addEventListener("keydown", function(e){
+    keys[e.key.toLowerCase()] = true;
+});
+
+window.addEventListener("keyup", function(e){
+    keys[e.key.toLowerCase()] = false;
+});
+
+function update(){
+
+    if(gameOver) return;
+
+    if(keys["a"]){
+        player.x -= player.speed;
+    }
+
+    if(keys["d"]){
+        player.x += player.speed;
+    }
+
+    if(player.x < 110){
+        player.x = 110;
+    }
+
+    if(player.x > 630){
+        player.x = 630;
+    }
+
+    enemy.y += enemy.speed;
+
+    if(enemy.y > 650){
+
+        enemy.y = -120;
+        enemy.x = 120 + Math.random() * 500;
+
+        score++;
+
+        enemy.speed += 0.2;
+    }
+
+    if(
+        player.x < enemy.x + enemy.width &&
+        player.x + player.width > enemy.x &&
+        player.y < enemy.y + enemy.height &&
+        player.y + player.height > enemy.y
+    ){
+        gameOver = true;
+    }
+}
+
+function drawRoad(){
+
+    ctx.fillStyle = "#228B22";
+    ctx.fillRect(0,0,800,600);
+
+    ctx.fillStyle = "#555";
+    ctx.fillRect(100,0,600,600);
+
+    ctx.fillStyle = "white";
+
+    for(let y=0;y<600;y+=60){
+        ctx.fillRect(395,y,10,40);
+    }
+}
+
+function drawPlayer(){
+
+    ctx.fillStyle = "deepskyblue";
+    ctx.fillRect(
+        player.x,
+        player.y,
+        player.width,
+        player.height
+    );
+}
+
+function drawEnemy(){
+
+    ctx.fillStyle = "red";
+    ctx.fillRect(
+        enemy.x,
+        enemy.y,
+        enemy.width,
+        enemy.height
+    );
+}
+
+function drawScore(){
+
+    ctx.fillStyle = "white";
+    ctx.font = "30px Arial";
+    ctx.fillText("Score: " + score,20,40);
+}
+
+function drawGameOver(){
+
+    if(!gameOver) return;
+
+    ctx.fillStyle = "rgba(0,0,0,0.7)";
+    ctx.fillRect(0,0,800,600);
+
+    ctx.fillStyle = "red";
+    ctx.font = "60px Arial";
+    ctx.fillText("GAME OVER",180,250);
+
+    ctx.fillStyle = "white";
+    ctx.font = "30px Arial";
+    ctx.fillText("Refresh Page To Restart",220,320);
+}
+
+function draw(){
+
+    drawRoad();
+    drawPlayer();
+    drawEnemy();
+    drawScore();
+    drawGameOver();
+}
+
+function gameLoop(){
+
+    update();
+    draw();
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+
+</script>
+
+</body>
+</html>

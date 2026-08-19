@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>Desert Runner</title>
+
+<style>
+body{
+    margin:0;
+    background:#e6e6e6;
+    overflow:hidden;
+}
+
+canvas{
+    display:block;
+    margin:auto;
+    background:white;
+}
+</style>
+</head>
+<body>
+
+<canvas id="game" width="900" height="300"></canvas>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let score = 0;
+let gameOver = false;
+
+let highScore =
+parseInt(localStorage.getItem("highScore")) || 0;
+
+let gameSpeed = 6;
+
+const player = {
+    x:80,
+    y:220,
+    w:40,
+    h:40,
+    vy:0
+};
+
+const cactusTypes = [
+    {w:25,h:50},
+    {w:40,h:70},
+    {w:60,h:90}
+];
+
+let cactus = {
+    x:900,
+    y:210,
+    w:25,
+    h:50
+};
+
+let gravity = 0.8;
+let jumping = false;
+
+document.addEventListener("keydown", function(e){
+
+    if(e.code === "Space" && !jumping && !gameOver){
+
+        player.vy = -15;
+        jumping = true;
+    }
+
+    if(gameOver && e.code === "KeyR"){
+        restartGame();
+    }
+
+});
+
+function restartGame(){
+
+    score = 0;
+    gameSpeed = 6;
+
+    player.y = 220;
+    player.vy = 0;
+
+    cactus.x = 900;
+
+    gameOver = false;
+    jumping = false;
+}
+
+function update(){
+
+    if(gameOver) return;
+
+    player.vy += gravity;
+    player.y += player.vy;
+
+    if(player.y > 220){
+        player.y = 220;
+        player.vy = 0;
+        jumping = false;
+    }
+
+    cactus.x -= gameSpeed;
+
+    if(cactus.x < -100){
+
+        cactus.x = 900;
+
+        score++;
+
+        let type =
+        cactusTypes[
+        Math.floor(
+        Math.random()*cactusTypes.length
+        )];
+
+        cactus.w = type.w;
+        cactus.h = type.h;
+        cactus.y = 260 - cactus.h;
+
+        if(score % 5 === 0){
+            gameSpeed += 0.5;
+        }
+    }
+
+    if(
+        player.x < cactus.x + cactus.w &&
+        player.x + player.w > cactus.x &&
+        player.y < cactus.y + cactus.h &&
+        player.y + player.h > cactus.y
+    ){
+
+        gameOver = true;
+
+        if(score > highScore){
+
+            highScore = score;
+
+            localStorage.setItem(
+                "highScore",
+                highScore
+            );
+        }
+    }
+}
+
+function drawGround(){
+
+    ctx.fillStyle = "black";
+
+    ctx.fillRect(
+        0,
+        260,
+        900,
+        4
+    );
+}
+
+function drawPlayer(){
+
+    ctx.fillStyle = "deepskyblue";
+
+    ctx.fillRect(
+        player.x,
+        player.y,
+        player.w,
+        player.h
+    );
+}
+
+function drawCactus(){
+
+    ctx.fillStyle = "green";
+
+    ctx.fillRect(
+        cactus.x,
+        cactus.y,
+        cactus.w,
+        cactus.h
+    );
+}
+
+function drawScore(){
+
+    ctx.fillStyle = "black";
+
+    ctx.font = "24px Arial";
+
+    ctx.fillText(
+        "Score: " + score,
+        20,
+        35
+    );
+
+    ctx.fillText(
+        "High Score: " + highScore,
+        20,
+        70
+    );
+}
+
+function drawGameOver(){
+
+    if(!gameOver) return;
+
+    ctx.fillStyle =
+    "rgba(0,0,0,0.5)";
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    ctx.fillStyle = "red";
+
+    ctx.font = "50px Arial";
+
+    ctx.fillText(
+        "GAME OVER",
+        300,
+        130
+    );
+
+    ctx.fillStyle = "white";
+
+    ctx.font = "28px Arial";
+
+    ctx.fillText(
+        "Press R To Restart",
+        320,
+        190
+    );
+}
+
+function draw(){
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    drawGround();
+    drawPlayer();
+    drawCactus();
+    drawScore();
+    drawGameOver();
+}
+
+function gameLoop(){
+
+    update();
+    draw();
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+
+</script>
+
+</body>
+</html>
