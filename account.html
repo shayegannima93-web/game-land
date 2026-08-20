@@ -16,61 +16,64 @@
 body{
     margin:0;
     min-height:100vh;
-    font-family:Arial,sans-serif;
 
     display:flex;
     justify-content:center;
     align-items:center;
 
+    font-family:Arial,sans-serif;
+
     background:
-    radial-gradient(circle at top,#253b80,#090b18 60%);
+    radial-gradient(circle at top,#263b85,#080a16 65%);
 
     color:white;
 }
 
 .container{
     width:92%;
-    max-width:420px;
+    max-width:430px;
+
     padding:30px;
 
-    background:rgba(255,255,255,0.08);
+    background:rgba(255,255,255,.08);
 
-    border:1px solid rgba(255,255,255,0.15);
+    border:1px solid rgba(255,255,255,.15);
 
     border-radius:25px;
 
-    backdrop-filter:blur(10px);
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
 
-    box-shadow:
-    0 20px 60px rgba(0,0,0,.5);
+    backdrop-filter:blur(12px);
 
     text-align:center;
 }
 
 .logo{
-    font-size:45px;
-    margin-bottom:5px;
+    font-size:55px;
 }
 
 h1{
-    margin:0 0 10px;
+    margin:5px 0 10px;
 }
 
 .subtitle{
-    color:#bbb;
+    color:#aaa;
     margin-bottom:25px;
 }
 
 input{
     width:100%;
+
     padding:15px;
 
-    margin:8px 0;
+    margin:7px 0;
 
-    border:none;
+    border:0;
+
     border-radius:12px;
 
-    background:#15182a;
+    background:#14172a;
+
     color:white;
 
     font-size:16px;
@@ -82,11 +85,13 @@ input:focus{
 
 button{
     width:100%;
+
     padding:15px;
 
     margin-top:12px;
 
-    border:none;
+    border:0;
+
     border-radius:12px;
 
     background:#1976ff;
@@ -99,12 +104,14 @@ button{
 }
 
 button:hover{
-    background:#0d5dcc;
+    opacity:.9;
 }
 
 .switch{
     margin-top:20px;
+
     color:#aaa;
+
     cursor:pointer;
 }
 
@@ -114,6 +121,7 @@ button:hover{
 
 .message{
     margin-top:15px;
+
     min-height:22px;
 }
 
@@ -121,42 +129,70 @@ button:hover{
     display:none;
 }
 
-.account{
+#accountBox{
     display:none;
+}
+
+.vipBox{
+    margin-top:20px;
+
+    padding:20px;
+
+    border-radius:18px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #4b2c83,
+        #16152d
+    );
+
+    border:1px solid #8d5cff;
+}
+
+.vipIcon{
+    font-size:50px;
+}
+
+.vipStatus{
+    font-size:20px;
+
+    margin:10px 0;
+}
+
+.vipButton{
+    background:#8e44ff;
+}
+
+.gameButton{
+    background:#00a86b;
 }
 
 .logout{
     background:#d32f2f;
 }
 
-.vip{
-    margin-top:20px;
-
-    padding:15px;
-
-    border-radius:15px;
-
-    background:linear-gradient(
-        135deg,
-        #4b2c83,
-        #16152c
-    );
-
-    border:1px solid #8d5cff;
+.hidden{
+    display:none;
 }
 
 </style>
-</head>
 
+</head>
 
 <body>
 
 
 <div class="container">
 
-    <div class="logo">🎮</div>
 
-    <h1>GameLand</h1>
+    <div class="logo">
+        🎮
+    </div>
+
+    <h1>
+        GameLand
+    </h1>
 
     <div class="subtitle">
         حساب کاربری
@@ -185,9 +221,15 @@ button:hover{
             🔑 ورود
         </button>
 
-        <div class="switch" onclick="showRegister()">
+        <div
+        class="switch"
+        onclick="showRegister()">
+
             حساب نداری؟
-            <span>ثبت‌نام کن</span>
+            <span>
+                ثبت‌نام کن
+            </span>
+
         </div>
 
     </div>
@@ -219,9 +261,15 @@ button:hover{
             📝 ساخت حساب
         </button>
 
-        <div class="switch" onclick="showLogin()">
+        <div
+        class="switch"
+        onclick="showLogin()">
+
             حساب داری؟
-            <span>وارد شو</span>
+            <span>
+                وارد شو
+            </span>
+
         </div>
 
     </div>
@@ -229,7 +277,7 @@ button:hover{
 
     <!-- ACCOUNT -->
 
-    <div id="accountBox" class="account">
+    <div id="accountBox">
 
         <h2>
             👋 خوش آمدی
@@ -237,25 +285,52 @@ button:hover{
 
         <h3 id="accountName"></h3>
 
-        <div class="vip">
 
-            👑 وضعیت اشتراک
+        <!-- VIP -->
 
-            <h3>
-                رایگان
-            </h3>
+        <div class="vipBox">
 
-            <p>
-                بخش VIP به‌زودی فعال می‌شود.
-            </p>
+            <div class="vipIcon">
+                👑
+            </div>
+
+            <h2>
+                GameLand VIP
+            </h2>
+
+            <div
+            id="vipStatus"
+            class="vipStatus">
+
+            </div>
+
+
+            <button
+            id="vipButton"
+            class="vipButton"
+            onclick="activateVIP()">
+
+                👑 فعال کردن VIP
+
+            </button>
+            <button
+            id="gameButton"
+            class="gameButton"
+            onclick="openSpaceGame()">
+
+                🚀 بازی فرار سفینه
+
+            </button>
 
         </div>
 
+
         <button
         class="logout"
-        onclick="logout()"
-        >
-            خروج از حساب
+        onclick="logout()">
+
+            🚪 خروج از حساب
+
         </button>
 
     </div>
@@ -264,7 +339,9 @@ button:hover{
     <div
     id="message"
     class="message">
+
     </div>
+
 
 </div>
 
@@ -272,35 +349,66 @@ button:hover{
 <script>
 
 
+/* =========================
+   نمایش ثبت نام
+========================= */
+
 function showRegister(){
 
-    document.getElementById("loginBox").style.display="none";
+    document.getElementById(
+        "loginBox"
+    ).style.display="none";
 
-    document.getElementById("registerBox").style.display="block";
+    document.getElementById(
+        "registerBox"
+    ).style.display="block";
 
     clearMessage();
+
 }
 
+
+/* =========================
+   نمایش ورود
+========================= */
 
 function showLogin(){
 
-    document.getElementById("registerBox").style.display="none";
+    document.getElementById(
+        "registerBox"
+    ).style.display="none";
 
-    document.getElementById("loginBox").style.display="block";
+    document.getElementById(
+        "loginBox"
+    ).style.display="block";
 
     clearMessage();
+
 }
 
 
+/* =========================
+   ثبت نام
+========================= */
+
 function register(){
+
     const username =
-    document.getElementById("registerUsername").value.trim();
+    document.getElementById(
+        "registerUsername"
+    ).value.trim();
+
 
     const password =
-    document.getElementById("registerPassword").value;
+    document.getElementById(
+        "registerPassword"
+    ).value;
+
 
     const password2 =
-    document.getElementById("registerPassword2").value;
+    document.getElementById(
+        "registerPassword2"
+    ).value;
 
 
     if(username.length < 3){
@@ -335,14 +443,16 @@ function register(){
 
     const users =
     JSON.parse(
-        localStorage.getItem("gamelandUsers") || "{}"
+        localStorage.getItem(
+            "gamelandUsers"
+        ) || "{}"
     );
 
 
     if(users[username]){
 
         showMessage(
-            "این نام کاربری قبلاً ثبت شده است."
+            "این نام کاربری قبلاً وجود دارد."
         );
 
         return;
@@ -364,36 +474,44 @@ function register(){
     );
 
 
+    document.getElementById(
+        "loginUsername"
+    ).value=username;
+
+
     showMessage(
-        "حساب با موفقیت ساخته شد! 🎉"
+        "حساب ساخته شد! حالا وارد شو 🎉"
     );
 
 
-    setTimeout(function(){
-
-        document.getElementById(
-            "loginUsername"
-        ).value = username;
-
-        showLogin();
-
-    },800);
+    showLogin();
 
 }
 
 
+/* =========================
+   ورود
+========================= */
+
 function login(){
 
     const username =
-    document.getElementById("loginUsername").value.trim();
+    document.getElementById(
+        "loginUsername"
+    ).value.trim();
+
 
     const password =
-    document.getElementById("loginPassword").value;
+    document.getElementById(
+        "loginPassword"
+    ).value;
 
 
     const users =
     JSON.parse(
-        localStorage.getItem("gamelandUsers") || "{}"
+        localStorage.getItem(
+            "gamelandUsers"
+        ) || "{}"
     );
 
 
@@ -428,6 +546,10 @@ function login(){
 }
 
 
+/* =========================
+   نمایش حساب
+========================= */
+
 function showAccount(){
 
     const username =
@@ -436,7 +558,11 @@ function showAccount(){
     );
 
 
-    if(!username) return;
+    if(!username){
+
+        return;
+
+    }
 
 
     document.getElementById(
@@ -456,14 +582,198 @@ function showAccount(){
 
     document.getElementById(
         "accountName"
-    ).textContent =
-    username;
+    ).textContent=username;
 
 
-    clearMessage();
+    updateVIP();
 
 }
 
+
+/* =========================
+   بررسی VIP
+========================= */
+
+function updateVIP(){
+
+    const username =
+    localStorage.getItem(
+        "gamelandCurrentUser"
+    );
+
+
+    if(!username){
+
+        return;
+
+    }
+
+
+    const users =
+    JSON.parse(
+        localStorage.getItem(
+            "gamelandUsers"
+        ) || "{}"
+    );
+
+
+    const isVIP =
+    users[username] &&
+    users[username].vip === true;
+    const status =
+    document.getElementById(
+        "vipStatus"
+    );
+
+
+    const vipButton =
+    document.getElementById(
+        "vipButton"
+    );
+
+
+    if(isVIP){
+
+        status.textContent =
+        "👑 اشتراک VIP فعال است";
+
+
+        vipButton.textContent =
+        "✅ VIP فعال است";
+
+
+        vipButton.disabled=true;
+
+
+        vipButton.style.opacity=".6";
+
+    }else{
+
+        status.textContent =
+        "🔒 اشتراک رایگان";
+
+
+        vipButton.textContent =
+        "👑 فعال کردن VIP";
+
+        vipButton.disabled=false;
+
+        vipButton.style.opacity="1";
+
+    }
+
+}
+
+
+/* =========================
+   فعال کردن VIP آزمایشی
+========================= */
+
+function activateVIP(){
+
+    const username =
+    localStorage.getItem(
+        "gamelandCurrentUser"
+    );
+
+
+    if(!username){
+
+        showMessage(
+            "ابتدا وارد حساب شو."
+        );
+
+        return;
+    }
+
+
+    const users =
+    JSON.parse(
+        localStorage.getItem(
+            "gamelandUsers"
+        ) || "{}"
+    );
+
+
+    if(!users[username]){
+
+        return;
+
+    }
+
+
+    users[username].vip=true;
+
+
+    localStorage.setItem(
+        "gamelandUsers",
+        JSON.stringify(users)
+    );
+
+
+    showMessage(
+        "🎉 VIP برای تست فعال شد!"
+    );
+
+
+    updateVIP();
+
+}
+
+
+/* =========================
+   باز کردن بازی سفینه
+========================= */
+
+function openSpaceGame(){
+
+    const username =
+    localStorage.getItem(
+        "gamelandCurrentUser"
+    );
+
+
+    if(!username){
+
+        showMessage(
+            "🔒 ابتدا وارد حساب شو."
+        );
+
+        return;
+    }
+
+
+    const users =
+    JSON.parse(
+        localStorage.getItem(
+            "gamelandUsers"
+        ) || "{}"
+    );
+
+
+    if(
+        !users[username] ||
+        users[username].vip !== true
+    ){
+
+        showMessage(
+            "👑 این بازی مخصوص اعضای VIP است."
+        );
+
+        return;
+
+    }
+
+
+    window.location.href =
+    "space.html";
+
+}
+
+
+/* =========================
+   خروج
+========================= */
 
 function logout(){
 
@@ -499,6 +809,10 @@ function logout(){
 }
 
 
+/* =========================
+   پیام
+========================= */
+
 function showMessage(text){
 
     document.getElementById(
@@ -517,7 +831,9 @@ function clearMessage(){
 }
 
 
-/* بررسی ورود قبلی */
+/* =========================
+   ورود خودکار
+========================= */
 
 window.addEventListener(
     "load",
@@ -535,6 +851,7 @@ window.addEventListener(
 
     }
 );
+
 
 </script>
 
