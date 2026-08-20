@@ -4,11 +4,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>GameLand - حساب کاربری</title>
+<title>GameLand | ورود</title>
 
 <style>
-
 *{
     box-sizing:border-box;
 }
@@ -16,794 +14,198 @@
 body{
     margin:0;
     min-height:100vh;
-
     display:flex;
     justify-content:center;
     align-items:center;
-
     font-family:Arial,sans-serif;
-
-    background:
-    radial-gradient(circle at top,#263b85,#080a16 65%);
-
+    background:linear-gradient(135deg,#0b1025,#281052);
     color:white;
 }
 
-.container{
+.box{
     width:92%;
-    max-width:430px;
-
-    padding:30px;
-
-    background:rgba(255,255,255,.08);
-
-    border:1px solid rgba(255,255,255,.15);
-
+    max-width:420px;
+    padding:28px;
+    background:#181c35;
     border-radius:25px;
-
-    box-shadow:0 20px 60px rgba(0,0,0,.5);
-
-    backdrop-filter:blur(12px);
-
     text-align:center;
+    box-shadow:0 15px 50px rgba(0,0,0,.5);
 }
 
 .logo{
     font-size:55px;
 }
 
-h1{
-    margin:5px 0 10px;
-}
-
-.subtitle{
-    color:#aaa;
-    margin-bottom:25px;
-}
-
 input{
     width:100%;
-
-    padding:15px;
-
+    padding:14px;
     margin:7px 0;
-
     border:0;
-
     border-radius:12px;
-
-    background:#14172a;
-
+    background:#292e4b;
     color:white;
-
     font-size:16px;
-}
-
-input:focus{
-    outline:2px solid #4da3ff;
 }
 
 button{
     width:100%;
-
-    padding:15px;
-
-    margin-top:12px;
-
+    padding:14px;
+    margin-top:10px;
     border:0;
-
     border-radius:12px;
-
     background:#1976ff;
-
     color:white;
-
     font-size:17px;
-
     cursor:pointer;
 }
 
-button:hover{
-    opacity:.9;
+.registerButton{
+    background:#00a86b;
 }
 
-.switch{
-    margin-top:20px;
-
-    color:#aaa;
-
+.link{
+    margin-top:18px;
+    color:#55aaff;
     cursor:pointer;
-}
-
-.switch span{
-    color:#4da3ff;
 }
 
 .message{
+    min-height:25px;
     margin-top:15px;
-
-    min-height:22px;
 }
 
 #registerBox{
     display:none;
 }
-
-#accountBox{
-    display:none;
-}
-
-.vipBox{
-    margin-top:20px;
-
-    padding:20px;
-
-    border-radius:18px;
-
-    background:
-    linear-gradient(
-        135deg,
-        #4b2c83,
-        #16152d
-    );
-
-    border:1px solid #8d5cff;
-}
-
-.vipIcon{
-    font-size:50px;
-}
-
-.vipStatus{
-    font-size:20px;
-
-    margin:10px 0;
-}
-
-.vipButton{
-    background:#8e44ff;
-}
-
-.gameButton{
-    background:#00a86b;
-}
-
-.logout{
-    background:#d32f2f;
-}
-
-.hidden{
-    display:none;
-}
-
 </style>
-
 </head>
 
 <body>
 
+<div class="box">
 
-<div class="container">
+<div class="logo">🎮</div>
 
+<h1>GameLand</h1>
 
-    <div class="logo">
-        🎮
-    </div>
-
-    <h1>
-        GameLand
-    </h1>
-
-    <div class="subtitle">
-        حساب کاربری
-    </div>
+<p>ورود به حساب کاربری</p>
 
 
-    <!-- LOGIN -->
+<!-- ورود -->
 
-    <div id="loginBox">
+<div id="loginBox">
 
-        <input
-        id="loginUsername"
-        type="text"
-        placeholder="نام کاربری"
-        autocomplete="username"
-        >
+<input
+id="loginName"
+type="text"
+placeholder="نام کاربری"
+autocomplete="username"
+>
 
-        <input
-        id="loginPassword"
-        type="password"
-        placeholder="رمز عبور"
-        autocomplete="current-password"
-        >
+<input
+id="loginPass"
+type="password"
+placeholder="رمز عبور"
+autocomplete="current-password"
+>
 
-        <button onclick="login()">
-            🔑 ورود
-        </button>
+<button onclick="loginUser()">
+🔑 ورود
+</button>
 
-        <div
-        class="switch"
-        onclick="showRegister()">
+<div
+class="link"
+onclick="showRegister()"
+>
+حساب نداری؟ ثبت‌نام کن
+</div>
 
-            حساب نداری؟
-            <span>
-                ثبت‌نام کن
-            </span>
-
-        </div>
-
-    </div>
+</div>
 
 
-    <!-- REGISTER -->
+<!-- ثبت نام -->
 
-    <div id="registerBox">
+<div id="registerBox">
 
-        <input
-        id="registerUsername"
-        type="text"
-        placeholder="نام کاربری"
-        >
+<h2>📝 ساخت حساب</h2>
 
-        <input
-        id="registerPassword"
-        type="password"
-        placeholder="رمز عبور"
-        >
+<input
+id="regName"
+type="text"
+placeholder="نام کاربری"
+>
 
-        <input
-        id="registerPassword2"
-        type="password"
-        placeholder="تکرار رمز عبور"
-        >
+<input
+id="regPass"
+type="password"
+placeholder="رمز عبور"
+>
 
-        <button onclick="register()">
-            📝 ساخت حساب
-        </button>
+<input
+id="regPass2"
+type="password"
+placeholder="تکرار رمز عبور"
+>
 
-        <div
-        class="switch"
-        onclick="showLogin()">
+<button
+class="registerButton"
+onclick="registerUser()"
+>
+ساخت حساب
+</button>
 
-            حساب داری؟
-            <span>
-                وارد شو
-            </span>
+<div
+class="link"
+onclick="showLogin()"
+>
+قبلاً حساب ساخته‌ام
+</div>
 
-        </div>
-
-    </div>
-
-
-    <!-- ACCOUNT -->
-
-    <div id="accountBox">
-
-        <h2>
-            👋 خوش آمدی
-        </h2>
-
-        <h3 id="accountName"></h3>
+</div>
 
 
-        <!-- VIP -->
-
-        <div class="vipBox">
-
-            <div class="vipIcon">
-                👑
-            </div>
-
-            <h2>
-                GameLand VIP
-            </h2>
-
-            <div
-            id="vipStatus"
-            class="vipStatus">
-
-            </div>
-
-
-            <button
-            id="vipButton"
-            class="vipButton"
-            onclick="activateVIP()">
-
-                👑 فعال کردن VIP
-
-            </button>
-            <button
-            id="gameButton"
-            class="gameButton"
-            onclick="openSpaceGame()">
-
-                🚀 بازی فرار سفینه
-
-            </button>
-
-        </div>
-
-
-        <button
-        class="logout"
-        onclick="logout()">
-
-            🚪 خروج از حساب
-
-        </button>
-
-    </div>
-
-
-    <div
-    id="message"
-    class="message">
-
-    </div>
-
+<div
+id="message"
+class="message"
+></div>
 
 </div>
 
 
 <script>
 
-
 /* =========================
-   نمایش ثبت نام
+   کاربران
 ========================= */
 
-function showRegister(){
+function getUsers(){
 
-    document.getElementById(
-        "loginBox"
-    ).style.display="none";
+    try{
 
-    document.getElementById(
-        "registerBox"
-    ).style.display="block";
+        return JSON.parse(
+            localStorage.getItem(
+                "gamelandUsers"
+            ) || "{}"
+        );
 
-    clearMessage();
+    }catch(error){
+
+        return {};
+
+    }
 
 }
 
 
 /* =========================
-   نمایش ورود
+   ذخیره کاربران
 ========================= */
 
-function showLogin(){
-
-    document.getElementById(
-        "registerBox"
-    ).style.display="none";
-
-    document.getElementById(
-        "loginBox"
-    ).style.display="block";
-
-    clearMessage();
-
-}
-
-
-/* =========================
-   ثبت نام
-========================= */
-
-function register(){
-
-    const username =
-    document.getElementById(
-        "registerUsername"
-    ).value.trim();
-
-
-    const password =
-    document.getElementById(
-        "registerPassword"
-    ).value;
-
-
-    const password2 =
-    document.getElementById(
-        "registerPassword2"
-    ).value;
-
-
-    if(username.length < 3){
-
-        showMessage(
-            "نام کاربری باید حداقل ۳ حرف باشد."
-        );
-
-        return;
-    }
-
-
-    if(password.length < 4){
-
-        showMessage(
-            "رمز عبور باید حداقل ۴ کاراکتر باشد."
-        );
-
-        return;
-    }
-
-
-    if(password !== password2){
-
-        showMessage(
-            "رمزهای عبور یکسان نیستند."
-        );
-
-        return;
-    }
-
-
-    const users =
-    JSON.parse(
-        localStorage.getItem(
-            "gamelandUsers"
-        ) || "{}"
-    );
-
-
-    if(users[username]){
-
-        showMessage(
-            "این نام کاربری قبلاً وجود دارد."
-        );
-
-        return;
-    }
-
-
-    users[username] = {
-
-        password:password,
-
-        vip:false
-
-    };
-
+function saveUsers(users){
 
     localStorage.setItem(
         "gamelandUsers",
         JSON.stringify(users)
-    );
-
-
-    document.getElementById(
-        "loginUsername"
-    ).value=username;
-
-
-    showMessage(
-        "حساب ساخته شد! حالا وارد شو 🎉"
-    );
-
-
-    showLogin();
-
-}
-
-
-/* =========================
-   ورود
-========================= */
-
-function login(){
-
-    const username =
-    document.getElementById(
-        "loginUsername"
-    ).value.trim();
-
-
-    const password =
-    document.getElementById(
-        "loginPassword"
-    ).value;
-
-
-    const users =
-    JSON.parse(
-        localStorage.getItem(
-            "gamelandUsers"
-        ) || "{}"
-    );
-
-
-    if(!users[username]){
-
-        showMessage(
-            "این حساب وجود ندارد."
-        );
-
-        return;
-    }
-
-
-    if(users[username].password !== password){
-
-        showMessage(
-            "رمز عبور اشتباه است."
-        );
-
-        return;
-    }
-
-
-    localStorage.setItem(
-        "gamelandCurrentUser",
-        username
-    );
-
-
-    showAccount();
-
-}
-
-
-/* =========================
-   نمایش حساب
-========================= */
-
-function showAccount(){
-
-    const username =
-    localStorage.getItem(
-        "gamelandCurrentUser"
-    );
-
-
-    if(!username){
-
-        return;
-
-    }
-
-
-    document.getElementById(
-        "loginBox"
-    ).style.display="none";
-
-
-    document.getElementById(
-        "registerBox"
-    ).style.display="none";
-
-
-    document.getElementById(
-        "accountBox"
-    ).style.display="block";
-
-
-    document.getElementById(
-        "accountName"
-    ).textContent=username;
-
-
-    updateVIP();
-
-}
-
-
-/* =========================
-   بررسی VIP
-========================= */
-
-function updateVIP(){
-
-    const username =
-    localStorage.getItem(
-        "gamelandCurrentUser"
-    );
-
-
-    if(!username){
-
-        return;
-
-    }
-
-
-    const users =
-    JSON.parse(
-        localStorage.getItem(
-            "gamelandUsers"
-        ) || "{}"
-    );
-
-
-    const isVIP =
-    users[username] &&
-    users[username].vip === true;
-    const status =
-    document.getElementById(
-        "vipStatus"
-    );
-
-
-    const vipButton =
-    document.getElementById(
-        "vipButton"
-    );
-
-
-    if(isVIP){
-
-        status.textContent =
-        "👑 اشتراک VIP فعال است";
-
-
-        vipButton.textContent =
-        "✅ VIP فعال است";
-
-
-        vipButton.disabled=true;
-
-
-        vipButton.style.opacity=".6";
-
-    }else{
-
-        status.textContent =
-        "🔒 اشتراک رایگان";
-
-
-        vipButton.textContent =
-        "👑 فعال کردن VIP";
-
-        vipButton.disabled=false;
-
-        vipButton.style.opacity="1";
-
-    }
-
-}
-
-
-/* =========================
-   فعال کردن VIP آزمایشی
-========================= */
-
-function activateVIP(){
-
-    const username =
-    localStorage.getItem(
-        "gamelandCurrentUser"
-    );
-
-
-    if(!username){
-
-        showMessage(
-            "ابتدا وارد حساب شو."
-        );
-
-        return;
-    }
-
-
-    const users =
-    JSON.parse(
-        localStorage.getItem(
-            "gamelandUsers"
-        ) || "{}"
-    );
-
-
-    if(!users[username]){
-
-        return;
-
-    }
-
-
-    users[username].vip=true;
-
-
-    localStorage.setItem(
-        "gamelandUsers",
-        JSON.stringify(users)
-    );
-
-
-    showMessage(
-        "🎉 VIP برای تست فعال شد!"
-    );
-
-
-    updateVIP();
-
-}
-
-
-/* =========================
-   باز کردن بازی سفینه
-========================= */
-
-function openSpaceGame(){
-
-    const username =
-    localStorage.getItem(
-        "gamelandCurrentUser"
-    );
-
-
-    if(!username){
-
-        showMessage(
-            "🔒 ابتدا وارد حساب شو."
-        );
-
-        return;
-    }
-
-
-    const users =
-    JSON.parse(
-        localStorage.getItem(
-            "gamelandUsers"
-        ) || "{}"
-    );
-
-
-    if(
-        !users[username] ||
-        users[username].vip !== true
-    ){
-
-        showMessage(
-            "👑 این بازی مخصوص اعضای VIP است."
-        );
-
-        return;
-
-    }
-
-
-    window.location.href =
-    "space.html";
-
-}
-
-
-/* =========================
-   خروج
-========================= */
-
-function logout(){
-
-    localStorage.removeItem(
-        "gamelandCurrentUser"
-    );
-
-
-    document.getElementById(
-        "accountBox"
-    ).style.display="none";
-
-
-    document.getElementById(
-        "loginBox"
-    ).style.display="block";
-
-
-    document.getElementById(
-        "loginUsername"
-    ).value="";
-
-
-    document.getElementById(
-        "loginPassword"
-    ).value="";
-
-
-    showMessage(
-        "از حساب خارج شدی."
     );
 
 }
@@ -817,43 +219,225 @@ function showMessage(text){
 
     document.getElementById(
         "message"
-    ).textContent=text;
-
-}
-
-
-function clearMessage(){
-
-    document.getElementById(
-        "message"
-    ).textContent="";
+    ).textContent = text;
 
 }
 
 
 /* =========================
-   ورود خودکار
+   نمایش ثبت نام
 ========================= */
 
-window.addEventListener(
-    "load",
-    function(){
+function showRegister(){
 
-        if(
-            localStorage.getItem(
-                "gamelandCurrentUser"
-            )
-        ){
+    document.getElementById(
+        "loginBox"
+    ).style.display = "none";
 
-            showAccount();
+    document.getElementById(
+        "registerBox"
+    ).style.display = "block";
 
-        }
+    showMessage("");
 
+}
+
+
+/* =========================
+   نمایش ورود
+========================= */
+
+function showLogin(){
+
+    document.getElementById(
+        "registerBox"
+    ).style.display = "none";
+
+    document.getElementById(
+        "loginBox"
+    ).style.display = "block";
+
+    showMessage("");
+
+}
+
+
+/* =========================
+   ثبت نام
+========================= */
+
+function registerUser(){
+
+    const name =
+        document.getElementById(
+            "regName"
+        ).value.trim();
+
+    const pass =
+        document.getElementById(
+            "regPass"
+        ).value;
+
+    const pass2 =
+        document.getElementById(
+            "regPass2"
+        ).value;
+
+
+    if(name.length < 3){
+
+        showMessage(
+            "نام کاربری باید حداقل ۳ حرف باشد."
+        );
+
+        return;
     }
-);
 
+
+    if(pass.length < 4){
+
+        showMessage(
+            "رمز عبور باید حداقل ۴ کاراکتر باشد."
+        );
+
+        return;
+    }
+
+
+    if(pass !== pass2){
+showMessage(
+            "رمزهای عبور یکسان نیستند."
+        );
+
+        return;
+    }
+
+
+    const users = getUsers();
+
+
+    if(users[name]){
+
+        showMessage(
+            "این نام کاربری قبلاً ساخته شده است."
+        );
+
+        return;
+    }
+
+
+    users[name] = {
+
+        password: pass
+
+    };
+
+
+    saveUsers(users);
+
+
+    document.getElementById(
+        "loginName"
+    ).value = name;
+
+
+    document.getElementById(
+        "regName"
+    ).value = "";
+
+    document.getElementById(
+        "regPass"
+    ).value = "";
+
+    document.getElementById(
+        "regPass2"
+    ).value = "";
+
+
+    showLogin();
+
+
+    showMessage(
+        "✅ حساب ساخته شد؛ حالا وارد شو."
+    );
+
+}
+
+
+/* =========================
+   ورود
+========================= */
+
+function loginUser(){
+
+    const name =
+        document.getElementById(
+            "loginName"
+        ).value.trim();
+
+    const pass =
+        document.getElementById(
+            "loginPass"
+        ).value;
+
+
+    const users = getUsers();
+
+
+    if(!users[name]){
+
+        showMessage(
+            "❌ این حساب وجود ندارد."
+        );
+
+        return;
+    }
+
+
+    if(users[name].password !== pass){
+
+        showMessage(
+            "❌ رمز عبور اشتباه است."
+        );
+
+        return;
+    }
+
+
+    /*
+      ذخیره کاربر وارد شده
+    */
+
+    localStorage.setItem(
+        "gamelandCurrentUser",
+        name
+    );
+
+
+    showMessage(
+        "✅ ورود موفق بود..."
+    );
+
+
+    /*
+      برگشت به صفحه اصلی GameLand
+      که همه بازی‌ها داخل آن هستند
+    */
+
+    setTimeout(
+        function(){
+
+            window.location.href =
+                "index.html";
+
+        },
+        500
+    );
+
+}
 
 </script>
 
 </body>
 </html>
+
