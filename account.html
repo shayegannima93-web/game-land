@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>GameLand - حساب کاربری</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    font-family:Arial,sans-serif;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:
+    radial-gradient(circle at top,#253b80,#090b18 60%);
+
+    color:white;
+}
+
+.container{
+    width:92%;
+    max-width:420px;
+    padding:30px;
+
+    background:rgba(255,255,255,0.08);
+
+    border:1px solid rgba(255,255,255,0.15);
+
+    border-radius:25px;
+
+    backdrop-filter:blur(10px);
+
+    box-shadow:
+    0 20px 60px rgba(0,0,0,.5);
+
+    text-align:center;
+}
+
+.logo{
+    font-size:45px;
+    margin-bottom:5px;
+}
+
+h1{
+    margin:0 0 10px;
+}
+
+.subtitle{
+    color:#bbb;
+    margin-bottom:25px;
+}
+
+input{
+    width:100%;
+    padding:15px;
+
+    margin:8px 0;
+
+    border:none;
+    border-radius:12px;
+
+    background:#15182a;
+    color:white;
+
+    font-size:16px;
+}
+
+input:focus{
+    outline:2px solid #4da3ff;
+}
+
+button{
+    width:100%;
+    padding:15px;
+
+    margin-top:12px;
+
+    border:none;
+    border-radius:12px;
+
+    background:#1976ff;
+
+    color:white;
+
+    font-size:17px;
+
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0d5dcc;
+}
+
+.switch{
+    margin-top:20px;
+    color:#aaa;
+    cursor:pointer;
+}
+
+.switch span{
+    color:#4da3ff;
+}
+
+.message{
+    margin-top:15px;
+    min-height:22px;
+}
+
+#registerBox{
+    display:none;
+}
+
+.account{
+    display:none;
+}
+
+.logout{
+    background:#d32f2f;
+}
+
+.vip{
+    margin-top:20px;
+
+    padding:15px;
+
+    border-radius:15px;
+
+    background:linear-gradient(
+        135deg,
+        #4b2c83,
+        #16152c
+    );
+
+    border:1px solid #8d5cff;
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+    <div class="logo">🎮</div>
+
+    <h1>GameLand</h1>
+
+    <div class="subtitle">
+        حساب کاربری
+    </div>
+
+
+    <!-- LOGIN -->
+
+    <div id="loginBox">
+
+        <input
+        id="loginUsername"
+        type="text"
+        placeholder="نام کاربری"
+        autocomplete="username"
+        >
+
+        <input
+        id="loginPassword"
+        type="password"
+        placeholder="رمز عبور"
+        autocomplete="current-password"
+        >
+
+        <button onclick="login()">
+            🔑 ورود
+        </button>
+
+        <div class="switch" onclick="showRegister()">
+            حساب نداری؟
+            <span>ثبت‌نام کن</span>
+        </div>
+
+    </div>
+
+
+    <!-- REGISTER -->
+
+    <div id="registerBox">
+
+        <input
+        id="registerUsername"
+        type="text"
+        placeholder="نام کاربری"
+        >
+
+        <input
+        id="registerPassword"
+        type="password"
+        placeholder="رمز عبور"
+        >
+
+        <input
+        id="registerPassword2"
+        type="password"
+        placeholder="تکرار رمز عبور"
+        >
+
+        <button onclick="register()">
+            📝 ساخت حساب
+        </button>
+
+        <div class="switch" onclick="showLogin()">
+            حساب داری؟
+            <span>وارد شو</span>
+        </div>
+
+    </div>
+
+
+    <!-- ACCOUNT -->
+
+    <div id="accountBox" class="account">
+
+        <h2>
+            👋 خوش آمدی
+        </h2>
+
+        <h3 id="accountName"></h3>
+
+        <div class="vip">
+
+            👑 وضعیت اشتراک
+
+            <h3>
+                رایگان
+            </h3>
+
+            <p>
+                بخش VIP به‌زودی فعال می‌شود.
+            </p>
+
+        </div>
+
+        <button
+        class="logout"
+        onclick="logout()"
+        >
+            خروج از حساب
+        </button>
+
+    </div>
+
+
+    <div
+    id="message"
+    class="message">
+    </div>
+
+</div>
+
+
+<script>
+
+
+function showRegister(){
+
+    document.getElementById("loginBox").style.display="none";
+
+    document.getElementById("registerBox").style.display="block";
+
+    clearMessage();
+}
+
+
+function showLogin(){
+
+    document.getElementById("registerBox").style.display="none";
+
+    document.getElementById("loginBox").style.display="block";
+
+    clearMessage();
+}
+
+
+function register(){
+    const username =
+    document.getElementById("registerUsername").value.trim();
+
+    const password =
+    document.getElementById("registerPassword").value;
+
+    const password2 =
+    document.getElementById("registerPassword2").value;
+
+
+    if(username.length < 3){
+
+        showMessage(
+            "نام کاربری باید حداقل ۳ حرف باشد."
+        );
+
+        return;
+    }
+
+
+    if(password.length < 4){
+
+        showMessage(
+            "رمز عبور باید حداقل ۴ کاراکتر باشد."
+        );
+
+        return;
+    }
+
+
+    if(password !== password2){
+
+        showMessage(
+            "رمزهای عبور یکسان نیستند."
+        );
+
+        return;
+    }
+
+
+    const users =
+    JSON.parse(
+        localStorage.getItem("gamelandUsers") || "{}"
+    );
+
+
+    if(users[username]){
+
+        showMessage(
+            "این نام کاربری قبلاً ثبت شده است."
+        );
+
+        return;
+    }
+
+
+    users[username] = {
+
+        password:password,
+
+        vip:false
+
+    };
+
+
+    localStorage.setItem(
+        "gamelandUsers",
+        JSON.stringify(users)
+    );
+
+
+    showMessage(
+        "حساب با موفقیت ساخته شد! 🎉"
+    );
+
+
+    setTimeout(function(){
+
+        document.getElementById(
+            "loginUsername"
+        ).value = username;
+
+        showLogin();
+
+    },800);
+
+}
+
+
+function login(){
+
+    const username =
+    document.getElementById("loginUsername").value.trim();
+
+    const password =
+    document.getElementById("loginPassword").value;
+
+
+    const users =
+    JSON.parse(
+        localStorage.getItem("gamelandUsers") || "{}"
+    );
+
+
+    if(!users[username]){
+
+        showMessage(
+            "این حساب وجود ندارد."
+        );
+
+        return;
+    }
+
+
+    if(users[username].password !== password){
+
+        showMessage(
+            "رمز عبور اشتباه است."
+        );
+
+        return;
+    }
+
+
+    localStorage.setItem(
+        "gamelandCurrentUser",
+        username
+    );
+
+
+    showAccount();
+
+}
+
+
+function showAccount(){
+
+    const username =
+    localStorage.getItem(
+        "gamelandCurrentUser"
+    );
+
+
+    if(!username) return;
+
+
+    document.getElementById(
+        "loginBox"
+    ).style.display="none";
+
+
+    document.getElementById(
+        "registerBox"
+    ).style.display="none";
+
+
+    document.getElementById(
+        "accountBox"
+    ).style.display="block";
+
+
+    document.getElementById(
+        "accountName"
+    ).textContent =
+    username;
+
+
+    clearMessage();
+
+}
+
+
+function logout(){
+
+    localStorage.removeItem(
+        "gamelandCurrentUser"
+    );
+
+
+    document.getElementById(
+        "accountBox"
+    ).style.display="none";
+
+
+    document.getElementById(
+        "loginBox"
+    ).style.display="block";
+
+
+    document.getElementById(
+        "loginUsername"
+    ).value="";
+
+
+    document.getElementById(
+        "loginPassword"
+    ).value="";
+
+
+    showMessage(
+        "از حساب خارج شدی."
+    );
+
+}
+
+
+function showMessage(text){
+
+    document.getElementById(
+        "message"
+    ).textContent=text;
+
+}
+
+
+function clearMessage(){
+
+    document.getElementById(
+        "message"
+    ).textContent="";
+
+}
+
+
+/* بررسی ورود قبلی */
+
+window.addEventListener(
+    "load",
+    function(){
+
+        if(
+            localStorage.getItem(
+                "gamelandCurrentUser"
+            )
+        ){
+
+            showAccount();
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
