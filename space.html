@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameLand - Space Battle</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    overflow:hidden;
+    background:#050518;
+    font-family:Arial,sans-serif;
+    touch-action:none;
+}
+
+canvas{
+    display:block;
+    margin:auto;
+    background:#050518;
+}
+
+#mobileControls{
+    position:fixed;
+    bottom:15px;
+    left:0;
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    padding:0 25px;
+    pointer-events:none;
+}
+
+.controlGroup{
+    display:flex;
+    gap:15px;
+}
+
+button{
+    border:none;
+    border-radius:15px;
+    background:rgba(255,255,255,.2);
+    color:white;
+    font-size:28px;
+    width:70px;
+    height:65px;
+    pointer-events:auto;
+    user-select:none;
+}
+
+#fire{
+    background:rgba(255,50,50,.35);
+}
+
+#restart{
+    position:fixed;
+    left:50%;
+    top:55%;
+    transform:translate(-50%,-50%);
+    display:none;
+    width:190px;
+    height:60px;
+    background:#1976d2;
+    font-size:20px;
+}
+#vipLock{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:#080b18;
+    color:white;
+
+    font-family:Arial,sans-serif;
+    text-align:center;
+}
+
+.vipBox{
+    width:90%;
+    max-width:420px;
+    padding:35px;
+
+    border-radius:25px;
+
+    background:#171a2e;
+    box-shadow:0 15px 50px #000;
+}
+
+.crown{
+    font-size:60px;
+}
+
+.vipBox button{
+    width:100%;
+    padding:15px;
+    margin-top:12px;
+
+    border:0;
+    border-radius:12px;
+
+    background:#1976ff;
+    color:white;
+
+    font-size:17px;
+}
+</style>
+</head>
+
+<body>
+<div id="vipLock">
+    <div class="vipBox">
+        <div class="crown">👑</div>
+        <h1>بازی VIP</h1>
+        <p>برای بازی کردن «فرار سفینه» باید عضو VIP باشی.</p>
+
+        <button onclick="goAccount()">
+            👤 حساب کاربری
+        </button>
+
+        <button onclick="goHome()">
+            🏠 صفحه اصلی
+        </button>
+    </div>
+</div>
+<canvas id="game"></canvas>
+
+<div id="mobileControls">
+
+    <div class="controlGroup">
+        <button id="left">⬅️</button>
+        <button id="right">➡️</button>
+    </div>
+
+    <button id="fire">🔥</button>
+
+</div>
+
+<button id="restart">🔄 دوباره بازی</button>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+    canvas.width = Math.min(window.innerWidth,900);
+    canvas.height = window.innerHeight;
+}
+
+resize();
+window.addEventListener("resize",resize);
+
+/* -------------------------
+   GAME VARIABLES
+------------------------- */
+
+let score = 0;
+
+let highScore =
+Number(localStorage.getItem("spaceHighScore")) || 0;
+
+let lives = 3;
+
+let gameOver = false;
+
+let gameStarted = false;
+
+let level = 1;
+
+let enemySpeed = 1.5;
+
+let spawnTimer = 0;
+
+let stars = [];
+
+let bullets = [];
+
+let enemies = [];
+
+let explosions = [];
+
+const keys = {};
+
+
+/* -------------------------
+   STARS
+------------------------- */
+
+for(let i=0;i<100;i++){
+
+    stars.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        size:Math.random()*2+1,
+        speed:Math.random()*2+0.5
+    });
+
+}
+
+
+/* -------------------------
+   PLAYER
+------------------------- */
+
+const player = {
+
+    x:canvas.width/2-25,
+
+    y:canvas.height-120,
+
+    width:50,
+
+    height:60,
+
+    speed:7
+
+};
+
+
+/* -------------------------
+   KEYBOARD
+------------------------- */
+
+window.addEventListener("keydown",function(e){
+
+    keys[e.key.toLowerCase()] = true;
+
+    if(e.code === "Space"){
+
+        e.preventDefault();
+
+        keys.space = true;
+
+    }
+
+    if(e.key.toLowerCase()==="r" && gameOver){
+
+        restartGame();
+
+    }
+
+});
+
+window.addEventListener("keyup",function(e){
+
+    keys[e.key.toLowerCase()] = false;
+
+    if(e.code === "Space"){
+
+        keys.space = false;
+
+    }
+
+});
+
+
+/* -------------------------
+   MOBILE CONTROLS
+------------------------- */
+
+function touchButton(id,key){
+
+    const button =
+    document.getElementById(id);
+
+    button.addEventListener("touchstart",function(e){
+
+        e.preventDefault();
+
+        keys[key]=true;
+
+    });
+
+    button.addEventListener("touchend",function(e){
+
+        e.preventDefault();
+
+        keys[key]=false;
+
+    });
+
+    button.addEventListener("touchcancel",function(){
+
+        keys[key]=false;
+
+    });
+
+}
+
+touchButton("left","a");
+touchButton("right","d");
+touchButton("fire","space");
+
+
+/* -------------------------
+   START GAME
+------------------------- */
+
+function startGame(){
+
+    gameStarted=true;
+
+}
+
+document.addEventListener("keydown",function(e){
+
+    if(!gameStarted && !gameOver){
+
+        startGame();
+
+    }
+
+});
+
+
+/* -------------------------
+   SHOOT
+------------------------- */
+
+let shootCooldown=0;
+
+function shoot(){
+
+    if(shootCooldown>0) return;
+
+    bullets.push({
+
+        x:player.x+player.width/2-3,
+
+        y:player.y,
+
+        width:6,
+
+        height:18,
+
+        speed:10
+
+    });
+
+    shootCooldown=12;
+    }
+
+
+/* -------------------------
+   CREATE ENEMY
+------------------------- */
+
+function createEnemy(){
+
+    const type =
+    Math.random();
+
+    let width=45;
+    let height=35;
+    let color="red";
+    let hp=1;
+
+    if(type>0.7){
+
+        width=60;
+        height=45;
+        color="orange";
+        hp=2;
+
+    }
+
+    if(type>0.9){
+
+        width=75;
+        height=50;
+        color="purple";
+        hp=3;
+
+    }
+
+    enemies.push({
+
+        x:Math.random()*(canvas.width-width),
+
+        y:-height,
+
+        width:width,
+
+        height:height,
+
+        speed:enemySpeed+Math.random()*1.5,
+
+        hp:hp,
+
+        color:color
+
+    });
+
+}
+
+
+/* -------------------------
+   EXPLOSION
+------------------------- */
+
+function createExplosion(x,y){
+
+    explosions.push({
+
+        x:x,
+
+        y:y,
+
+        radius:5,
+
+        life:25
+
+    });
+
+}
+
+
+/* -------------------------
+   UPDATE
+------------------------- */
+
+function update(){
+
+    if(gameOver) return;
+
+    if(!gameStarted) return;
+
+
+    /* PLAYER */
+
+    if(keys.a || keys.arrowleft){
+
+        player.x-=player.speed;
+
+    }
+
+    if(keys.d || keys.arrowright){
+
+        player.x+=player.speed;
+
+    }
+
+    if(player.x<0){
+
+        player.x=0;
+
+    }
+
+    if(player.x+player.width>canvas.width){
+
+        player.x=canvas.width-player.width;
+
+    }
+
+
+    /* SHOOT */
+
+    if(keys.space){
+
+        shoot();
+
+    }
+
+    if(shootCooldown>0){
+
+        shootCooldown--;
+
+    }
+
+
+    /* BULLETS */
+
+    for(let i=bullets.length-1;i>=0;i--){
+
+        bullets[i].y-=bullets[i].speed;
+
+        if(bullets[i].y<-30){
+
+            bullets.splice(i,1);
+
+        }
+
+    }
+
+
+    /* ENEMIES */
+
+    spawnTimer--;
+
+    if(spawnTimer<=0){
+
+        createEnemy();
+
+        spawnTimer=
+        Math.max(20,70-level*4);
+
+    }
+
+
+    for(let i=enemies.length-1;i>=0;i--){
+
+        let enemy=enemies[i];
+
+        enemy.y+=enemy.speed;
+
+
+        /* PLAYER COLLISION */
+
+        if(
+
+            player.x < enemy.x+enemy.width &&
+
+            player.x+player.width > enemy.x &&
+
+            player.y < enemy.y+enemy.height &&
+
+            player.y+player.height > enemy.y
+
+        ){
+
+            createExplosion(
+                enemy.x+enemy.width/2,
+                enemy.y+enemy.height/2
+            );
+
+            enemies.splice(i,1);
+
+            lives--;
+
+            if(lives<=0){
+
+                endGame();
+
+            }
+
+            continue;
+
+        }
+
+
+        if(enemy.y>canvas.height+50){
+
+            enemies.splice(i,1);
+
+        }
+
+    }
+
+
+    /* BULLET / ENEMY COLLISION */
+
+    for(let i=bullets.length-1;i>=0;i--){
+
+        let hit=false;
+
+        for(let j=enemies.length-1;j>=0;j--){
+
+            let b=bullets[i];
+
+            let e=enemies[j];
+
+            if(
+
+                b.x < e.x+e.width &&
+
+                b.x+b.width > e.x &&
+
+                b.y < e.y+e.height &&
+
+                b.y+b.height > e.y
+
+            ){
+
+                e.hp--;
+
+                bullets.splice(i,1);
+
+                hit=true;
+
+                if(e.hp<=0){
+
+                    createExplosion(
+
+                        e.x+e.width/2,
+
+                        e.y+e.height/2
+
+                    );
+
+                    enemies.splice(j,1);
+
+                    score++;
+
+                    if(score>highScore){
+
+                        highScore=score;
+
+                        localStorage.setItem(
+                            "spaceHighScore",
+                            highScore
+                        );
+
+                    }
+
+                    if(score%10===0){
+
+                        level++;
+
+                        enemySpeed+=0.3;
+
+                    }
+
+                }
+
+                break;
+
+            }
+
+        }
+
+        if(hit) continue;
+
+    }
+
+
+    /* EXPLOSIONS */
+
+    for(let i=explosions.length-1;i>=0;i--){
+
+        explosions[i].radius+=3;
+
+        explosions[i].life--;
+
+        if(explosions[i].life<=0){
+
+            explosions.splice(i,1);
+
+        }
+
+    }
+
+
+    /* STARS */
+
+    for(let star of stars){
+
+        star.y+=star.speed;
+
+        if(star.y>canvas.height){
+
+            star.y=0;
+            star.x=Math.random()*canvas.width;
+
+        }
+
+    }
+
+}
+
+
+/* -------------------------
+   DRAW STARS
+------------------------- */
+
+function drawStars(){
+
+    ctx.fillStyle="white";
+
+    for(let star of stars){
+
+        ctx.fillRect(
+            star.x,
+            star.y,
+            star.size,
+            star.size
+        );
+
+    }
+
+}
+
+
+/* -------------------------
+   DRAW PLAYER
+------------------------- */
+
+function drawPlayer(){
+
+    ctx.fillStyle="#00d9ff";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        player.x+player.width/2,
+        player.y
+    );
+
+    ctx.lineTo(
+        player.x,
+        player.y+player.height
+    );
+
+    ctx.lineTo(
+        player.x+player.width,
+        player.y+player.height
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    ctx.fillStyle="orange";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        player.x+15,
+        player.y+player.height
+    );
+
+    ctx.lineTo(
+        player.x+25,
+        player.y+player.height+20
+    );
+
+    ctx.lineTo(
+        player.x+35,
+        player.y+player.height
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+}
+
+
+/* -------------------------
+   DRAW BULLETS
+------------------------- */
+
+function drawBullets(){
+
+    ctx.fillStyle="yellow";
+
+    for(let b of bullets){
+
+        ctx.fillRect(
+            b.x,
+            b.y,
+            b.width,
+            b.height
+        );
+
+    }
+
+}
+
+
+/* -------------------------
+   DRAW ENEMIES
+------------------------- */
+
+function drawEnemies(){
+
+    for(let e of enemies){
+
+        ctx.fillStyle=e.color;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            e.x+e.width/2,
+            e.y+e.height/2,
+            e.width/2,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+
+        ctx.fillStyle="white";
+
+        ctx.fillRect(
+            e.x+10,
+            e.y+12,
+            8,
+            8
+        );
+
+        ctx.fillRect(
+            e.x+e.width-18,
+            e.y+12,
+            8,
+            8
+        );
+
+    }
+
+}
+
+
+/* -------------------------
+   DRAW EXPLOSIONS
+------------------------- */
+
+function drawExplosions(){
+
+    for(let ex of explosions){
+
+        ctx.strokeStyle="orange";
+
+        ctx.lineWidth=4;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            ex.x,
+            ex.y,
+            ex.radius,
+            0,
+            Math.PI*2
+        );
+
+        ctx.stroke();
+
+    }
+
+}
+
+
+/* -------------------------
+   HUD
+------------------------- */
+
+function drawHUD(){
+
+    ctx.fillStyle="white";
+
+    ctx.font="20px Arial";
+
+    ctx.fillText(
+        "Score: "+score,
+        15,
+        30
+    );
+
+    ctx.fillText(
+        "High: "+highScore,
+        15,
+        58
+    );
+
+    ctx.fillText(
+        "❤️ ".repeat(lives),
+        15,
+        86
+    );
+
+    ctx.fillText(
+        "Level: "+level,
+        canvas.width-110,
+        30
+    );
+
+}
+
+
+/* -------------------------
+   START SCREEN
+------------------------- */
+
+function drawStartScreen(){
+
+    if(gameStarted) return;
+
+    ctx.fillStyle="rgba(0,0,30,.75)";
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    ctx.fillStyle="#00d9ff";
+
+    ctx.font="45px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.fillText(
+        "🚀 SPACE BATTLE",
+        canvas.width/2,
+        canvas.height/2-40
+    );
+
+    ctx.fillStyle="white";
+
+    ctx.font="22px Arial";
+
+    ctx.fillText(
+        "Press any key or tap FIRE",
+        canvas.width/2,
+        canvas.height/2+10
+    );
+
+    ctx.textAlign="left";
+
+}
+
+
+/* -------------------------
+   GAME OVER
+------------------------- */
+
+function drawGameOver(){
+
+    if(!gameOver) return;
+
+    ctx.fillStyle="rgba(0,0,0,.7)";
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    ctx.fillStyle="red";
+
+    ctx.font="50px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.fillText(
+        "GAME OVER",
+        canvas.width/2,
+        canvas.height/2-30
+    );
+
+    ctx.fillStyle="white";
+
+    ctx.font="22px Arial";
+
+    ctx.fillText(
+        "Score: "+score,
+        canvas.width/2,
+        canvas.height/2+15
+    );
+    ctx.fillText(
+        "Press R or Restart",
+        canvas.width/2,
+        canvas.height/2+55
+    );
+
+    ctx.textAlign="left";
+
+}
+
+
+/* -------------------------
+   DRAW
+------------------------- */
+
+function draw(){
+
+    ctx.fillStyle="#050518";
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    drawStars();
+
+    drawPlayer();
+
+    drawBullets();
+
+    drawEnemies();
+
+    drawExplosions();
+
+    drawHUD();
+
+    drawStartScreen();
+
+    drawGameOver();
+
+}
+
+
+/* -------------------------
+   GAME OVER
+------------------------- */
+
+function endGame(){
+
+    gameOver=true;
+
+    document.getElementById(
+        "restart"
+    ).style.display="block";
+
+}
+
+
+/* -------------------------
+   RESTART
+------------------------- */
+
+function restartGame(){
+
+    score=0;
+
+    lives=3;
+
+    level=1;
+
+    enemySpeed=1.5;
+
+    bullets=[];
+
+    enemies=[];
+
+    explosions=[];
+
+    player.x=
+    canvas.width/2-player.width/2;
+
+    player.y=
+    canvas.height-120;
+
+    gameOver=false;
+
+    gameStarted=true;
+
+    document.getElementById(
+        "restart"
+    ).style.display="none";
+
+}
+
+
+/* -------------------------
+   RESTART BUTTON
+------------------------- */
+
+document.getElementById(
+    "restart"
+).addEventListener(
+    "click",
+    restartGame
+);
+
+
+/* -------------------------
+   MOBILE START
+------------------------- */
+
+document.getElementById(
+    "fire"
+).addEventListener(
+    "touchstart",
+    function(){
+
+        if(!gameStarted && !gameOver){
+
+            gameStarted=true;
+
+        }
+
+    }
+);
+
+
+/* -------------------------
+   GAME LOOP
+------------------------- */
+
+function gameLoop(){
+
+    update();
+
+    draw();
+
+    requestAnimationFrame(gameLoop);
+
+}
+
+gameLoop();
+function checkVIP(){
+
+    const user =
+    localStorage.getItem("gamelandCurrentUser");
+
+    const users =
+    JSON.parse(
+        localStorage.getItem("gamelandUsers") || "{}"
+    );
+
+    if(
+        !user ||
+        !users[user] ||
+        users[user].vip !== true
+    ){
+        document.getElementById("vipLock").style.display="flex";
+    }else{
+        document.getElementById("vipLock").style.display="none";
+    }
+}
+
+function goAccount(){
+    window.location.href="account.html";
+}
+
+function goHome(){
+    window.location.href="index.html";
+}
+
+checkVIP();
+</script>
+
+</body>
+</html>
