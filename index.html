@@ -1,103 +1,1199 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
+
 <head>
+
 <meta charset="UTF-8">
-<title>بازی‌های نیما</title>
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<meta name="description"
+      content="GameLand - مجموعه‌ای از بازی‌های آنلاین رایگان">
+
+<meta name="theme-color"
+      content="#07111f">
+
+<title>🎮 GameLand | گیم لند</title>
+
 
 <style>
+
+/* =========================
+   RESET
+========================= */
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
 body{
-    font-family:Arial;
-    background:#111;
+
+    font-family:
+        Arial,
+        Tahoma,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at top,
+            #102b4c 0%,
+            #07111f 40%,
+            #03070d 100%
+        );
+
     color:white;
-    text-align:center;
+
+    min-height:100vh;
+
+    overflow-x:hidden;
 }
 
-.game{
-    background:#222;
-    width:300px;
-    margin:20px auto;
-    padding:20px;
-    border-radius:10px;
+
+/* =========================
+   HEADER
+========================= */
+
+header{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:1000;
+
+    width:100%;
+
+    background:
+        rgba(5,12,24,.90);
+
+    backdrop-filter:
+        blur(14px);
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.08);
+
+    box-shadow:
+        0 8px 30px
+        rgba(0,0,0,.25);
 }
 
-a{
-    color:cyan;
+
+.header-inner{
+
+    max-width:1150px;
+
+    margin:auto;
+
+    padding:
+        15px 20px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:20px;
+}
+
+
+/* LOGO */
+
+.logo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    font-size:25px;
+
+    font-weight:bold;
+
+    color:#38bdf8;
+
+    white-space:nowrap;
+}
+
+
+.logo-icon{
+
+    width:45px;
+
+    height:45px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #168cff,
+            #7c3aed
+        );
+
+    box-shadow:
+        0 8px 25px
+        rgba(22,140,255,.25);
+}
+
+
+/* NAV */
+
+nav{
+
+    display:flex;
+
+    gap:8px;
+
+    align-items:center;
+}
+
+
+nav a{
+
     text-decoration:none;
+
+    color:#dbeafe;
+
+    padding:
+        10px 14px;
+
+    border-radius:10px;
+
+    transition:
+        background .2s,
+        transform .2s;
 }
+
+
+nav a:hover{
+
+    background:
+        rgba(255,255,255,.08);
+
+    transform:
+        translateY(-2px);
+}
+
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+
+    position:relative;
+
+    overflow:hidden;
+
+    text-align:center;
+
+    padding:
+        80px 20px
+        65px;
+
+}
+
+
+.hero::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:350px;
+
+    height:350px;
+
+    border-radius:50%;
+
+    background:
+        rgba(0,180,255,.12);
+
+    filter:blur(70px);
+
+    top:-150px;
+
+    left:50%;
+
+    transform:
+        translateX(-50%);
+}
+
+
+.hero-content{
+
+    position:relative;
+
+    z-index:2;
+
+    max-width:800px;
+
+    margin:auto;
+}
+
+
+.hero h1{
+
+    font-size:
+        clamp(
+            42px,
+            8vw,
+            75px
+        );
+
+    line-height:1.2;
+
+    margin-bottom:20px;
+
+    text-shadow:
+        0 5px 30px
+        rgba(0,180,255,.25);
+}
+
+
+.hero h1 span{
+
+    color:#38bdf8;
+}
+
+
+.hero p{
+
+    color:#aebed3;
+
+    font-size:
+        clamp(
+            16px,
+            3vw,
+            20px
+        );
+
+    line-height:2;
+
+    margin:auto;
+
+    max-width:650px;
+}
+
+
+.hero-button{
+
+    display:inline-block;
+
+    margin-top:30px;
+
+    padding:
+        14px 30px;
+
+    border-radius:14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #168cff,
+            #2563eb
+        );
+
+    color:white;
+
+    text-decoration:none;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    box-shadow:
+        0 10px 30px
+        rgba(22,140,255,.25);
+
+    transition:
+        transform .2s,
+        box-shadow .2s;
+}
+
+
+.hero-button:hover{
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 15px 35px
+        rgba(22,140,255,.35);
+}
+
+
+/* =========================
+   GAMES SECTION
+========================= */
+
+.games{
+
+    width:92%;
+
+    max-width:1150px;
+
+    margin:
+        0 auto 80px;
+}
+
+
+.section-title{
+
+    text-align:center;
+
+    font-size:32px;
+
+    margin-bottom:10px;
+}
+.section-subtitle{
+
+    text-align:center;
+
+    color:#8fa2ba;
+
+    margin-bottom:35px;
+}
+
+
+/* GRID */
+
+.game-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(
+                250px,
+                1fr
+            )
+        );
+
+    gap:22px;
+}
+
+
+/* =========================
+   GAME CARD
+========================= */
+
+.game-card{
+
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            145deg,
+            #111e32,
+            #0b1423
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    border-radius:22px;
+
+    box-shadow:
+        0 12px 35px
+        rgba(0,0,0,.25);
+
+    transition:
+        transform .25s,
+        border-color .25s,
+        box-shadow .25s;
+}
+
+
+.game-card:hover{
+
+    transform:
+        translateY(-7px);
+
+    border-color:
+        rgba(56,189,248,.5);
+
+    box-shadow:
+        0 18px 45px
+        rgba(0,0,0,.4);
+}
+
+
+/* GAME IMAGE */
+
+.game-icon{
+
+    height:160px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:75px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(56,189,248,.18),
+            transparent 65%
+        );
+}
+
+
+.game-content{
+
+    padding:22px;
+}
+
+
+.game-content h2{
+
+    font-size:23px;
+
+    margin-bottom:10px;
+}
+
+
+.game-content p{
+
+    color:#9fb0c5;
+
+    line-height:1.8;
+
+    min-height:58px;
+
+    margin-bottom:18px;
+}
+
+
+/* PLAY BUTTON */
+
+.play-button{
+
+    display:block;
+
+    width:100%;
+
+    border:0;
+
+    border-radius:13px;
+
+    padding:13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #168cff,
+            #2563eb
+        );
+
+    color:white;
+
+    text-align:center;
+
+    text-decoration:none;
+
+    font-size:17px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:
+        transform .2s,
+        filter .2s;
+}
+
+
+.play-button:hover{
+
+    transform:
+        translateY(-2px);
+
+    filter:
+        brightness(1.12);
+}
+
+
+/* =========================
+   COMING SOON
+========================= */
+
+.coming-soon{
+
+    opacity:.75;
+}
+
+
+.coming-soon .game-icon{
+
+    filter:
+        grayscale(.4);
+}
+
+
+.soon-button{
+
+    background:
+        #26364d;
+
+    cursor:default;
+}
+
+
+/* =========================
+   ACCOUNT
+========================= */
+
+.account{
+
+    width:92%;
+
+    max-width:800px;
+
+    margin:
+        0 auto 70px;
+
+    padding:35px 25px;
+
+    text-align:center;
+
+    border-radius:25px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #111e32,
+            #0b1423
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    box-shadow:
+        0 15px 40px
+        rgba(0,0,0,.25);
+}
+
+
+.account-icon{
+
+    font-size:50px;
+
+    margin-bottom:12px;
+}
+
+
+.account h2{
+
+    font-size:28px;
+
+    margin-bottom:10px;
+}
+
+
+.account p{
+
+    color:#9fb0c5;
+
+    line-height:1.8;
+
+    margin-bottom:22px;
+}
+
+
+.account-button{
+
+    display:inline-block;
+
+    padding:
+        12px 25px;
+
+    border-radius:12px;
+
+    background:#263a64;
+
+    color:white;
+
+    text-decoration:none;
+
+    transition:
+        background .2s,
+        transform .2s;
+}
+
+
+.account-button:hover{
+
+    background:#315087;
+
+    transform:
+        translateY(-2px);
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer{
+
+    text-align:center;
+
+    padding:
+        35px 20px;
+
+    background:
+        rgba(0,0,0,.25);
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.07);
+
+    color:#73849b;
+
+    line-height:2;
+}
+
+
+footer strong{
+
+    color:#38bdf8;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:700px){
+
+    .header-inner{
+
+        padding:
+            12px 15px;
+    }
+
+
+    .logo{
+
+        font-size:20px;
+    }
+
+
+    .logo-icon{
+
+        width:38px;
+
+        height:38px;
+    }
+
+
+    nav a{
+
+        padding:
+            8px 10px;
+
+        font-size:13px;
+    }
+
+
+    .hero{
+
+        padding:
+            60px 18px
+            50px;
+    }
+
+
+    .hero h1{
+
+        font-size:42px;
+    }
+
+
+    .hero p{
+font-size:15px;
+
+        line-height:1.9;
+    }
+
+
+    .game-grid{
+
+        grid-template-columns:
+            1fr;
+
+        gap:18px;
+    }
+
+
+    .game-icon{
+
+        height:140px;
+
+        font-size:65px;
+    }
+
+
+    .game-content{
+
+        padding:20px;
+    }
+
+
+    .account{
+
+        padding:28px 20px;
+    }
+
+}
+
+
+/* =========================
+   SMALL PHONES
+========================= */
+
+@media(max-width:380px){
+
+    .header-inner{
+
+        gap:8px;
+    }
+
+
+    .logo{
+
+        font-size:18px;
+    }
+
+
+    nav a{
+
+        font-size:12px;
+
+        padding:
+            7px 8px;
+    }
+
+
+    .hero h1{
+
+        font-size:36px;
+    }
+
+}
+
 </style>
+
 </head>
+
+
 <body>
 
-<h1>🎮 گیم لند</h1>
+
+<!-- ==================================================
+     HEADER
+================================================== -->
+
+<header>
+
+    <div class="header-inner">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                🎮
+            </div>
+
+            GameLand
+
+        </div>
 
 
+        <nav>
 
-<a href="escape.html">🎯 فرار از سایه</a>
+            <a href="#games">
+                🎮 بازی‌ها
+            </a>
 
-<br><br>
+            <a href="#account">
+                👤 حساب
+            </a>
 
+        </nav>
 
-
-
-
-<a href="car.html">🚗 فرار با ماشین</a>
-
-<br><br>
-
-
-<a href="desert.html">🦖  دای ناسور</a>
-
-
-<a href="space.html" class="game-card">
-    👑
-    <h2>فرار سفینه</h2>
-    
-</a>
-
-<div class="card">
-
-    <div class="cardTop">
-        ✈️
     </div>
 
-    <div class="cardBody">
+</header>
 
-        <h3>
-            نبرد هوایی
-        </h3>
+
+<!-- ==================================================
+     HERO
+================================================== -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <h1>
+            به <span>GameLand</span>
+            خوش آمدی 🎮
+        </h1>
+
 
         <p>
-            با هواپیما پرواز کن،
-            به دشمن‌ها شلیک کن و رکورد بزن.
+
+            مجموعه‌ای از بازی‌های سرگرم‌کننده
+            که می‌توانی مستقیم از سایت اجرا کنی.
+
+            <br>
+
+            بدون VIP و بدون پرداخت.
+
         </p>
 
-        <button
-            class="play"
-            onclick="window.location.href='air.html'">
 
-            ✈️ بازی کردن
+        <a
+            href="#games"
+            class="hero-button">
 
-        </button>
+            🚀 شروع بازی
+
+        </a>
 
     </div>
 
-</div>
+</section>
 
 
+<!-- ==================================================
+     GAMES
+================================================== -->
+
+<section
+    class="games"
+    id="games">
 
 
+    <h2 class="section-title">
+        🎮 بازی‌های GameLand
+    </h2>
 
 
+    <p class="section-subtitle">
+        یک بازی انتخاب کن و شروع کن!
+    </p>
 
 
+    <div class="game-grid">
 
 
+        <!-- =========================
+             ESCAPE
+        ========================= -->
+
+        <article class="game-card">
+
+            <div class="game-icon">
+                🎯
+            </div>
 
 
-<div class="game">
-    <h2>بازی بعدی</h2>
-    <p>به زودی...</p>
-</div>
+            <div class="game-content">
+
+                <h2>
+                    فرار از سایه
+                </h2>
+
+
+                <p>
+                    از سایه‌ها فرار کن،
+                    موانع را رد کن و رکوردت را بالا ببر.
+                </p>
+
+
+                <a
+                    href="escape.html"
+                    class="play-button">
+
+                    ▶️ بازی کردن
+
+                </a>
+
+            </div>
+
+        </article>
+
+
+        <!-- =========================
+             CAR
+        ========================= -->
+
+        <article class="game-card">
+
+            <div class="game-icon">
+                🚗
+            </div>
+
+
+            <div class="game-content">
+
+                <h2>
+                    فرار با ماشین
+                </h2>
+
+
+                <p>
+                    با ماشین حرکت کن،
+                    از موانع فرار کن و رکورد بزن.
+                </p>
+
+
+                <a
+                    href="car.html"
+                    class="play-button">
+
+                    ▶️ بازی کردن
+
+                </a>
+
+            </div>
+
+        </article>
+
+
+        <!-- =========================
+             DINOSAUR
+        ========================= -->
+
+        <article class="game-card">
+
+            <div class="game-icon">
+                🦖
+            </div>
+
+
+            <div class="game-content">
+
+                <h2>
+                    دایناسور
+                </h2>
+
+
+                <p>
+                    از موانع عبور کن و
+                    تا جایی که می‌توانی ادامه بده.
+                </p>
+
+
+                <a
+                    href="desert.html"
+                    class="play-button">
+
+                    ▶️ بازی کردن
+
+                </a>
+
+            </div>
+
+        </article>
+<!-- =========================
+             SPACE
+        ========================= -->
+
+        <article class="game-card">
+
+            <div class="game-icon">
+                🚀
+            </div>
+
+
+            <div class="game-content">
+
+                <h2>
+                    فرار سفینه
+                </h2>
+
+
+                <p>
+                    سفینه را کنترل کن و
+                    در فضای خطرناک زنده بمان.
+                </p>
+
+
+                <a
+                    href="space.html"
+                    class="play-button">
+
+                    ▶️ بازی کردن
+
+                </a>
+
+            </div>
+
+        </article>
+
+
+        <!-- =========================
+             AIR
+        ========================= -->
+
+        <article class="game-card">
+
+            <div class="game-icon">
+                ✈️
+            </div>
+
+
+            <div class="game-content">
+
+                <h2>
+                    نبرد هوایی
+                </h2>
+
+
+                <p>
+                    هواپیما را کنترل کن،
+                    به دشمن‌ها شلیک کن و رکورد بزن.
+                </p>
+
+
+                <a
+                    href="air.html"
+                    class="play-button">
+
+                    ▶️ بازی کردن
+
+                </a>
+
+            </div>
+
+        </article>
+
+
+        <!-- =========================
+             COMING SOON
+        ========================= -->
+
+        <article
+            class="game-card coming-soon">
+
+            <div class="game-icon">
+                🎮
+            </div>
+
+
+            <div class="game-content">
+
+                <h2>
+                    بازی بعدی
+                </h2>
+
+
+                <p>
+                    یک بازی جدید به‌زودی
+                    به GameLand اضافه می‌شود.
+                </p>
+
+
+                <div
+                    class="play-button soon-button">
+
+                    🔒 به‌زودی
+
+                </div>
+
+            </div>
+
+        </article>
+
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     ACCOUNT
+================================================== -->
+
+<section
+    class="account"
+    id="account">
+
+
+    <div class="account-icon">
+        👤
+    </div>
+
+
+    <h2>
+        حساب کاربری
+    </h2>
+
+
+    <p>
+        برای ورود به حساب کاربری
+        از این قسمت استفاده کن.
+    </p>
+
+
+    <a
+        href="account.html"
+        class="account-button">
+
+        👤 ورود به حساب
+
+    </a>
+
+</section>
+
+
+<!-- ==================================================
+     FOOTER
+================================================== -->
+
+<footer>
+
+    <strong>
+        🎮 GameLand
+    </strong>
+
+    <br>
+
+    مجموعه بازی‌های آنلاین
+
+    <br>
+
+    © 2026 GameLand
+
+</footer>
+
 
 </body>
+
 </html>
