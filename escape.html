@@ -1,473 +1,1431 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Escape The Shadow Deluxe</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>GameLand - فرار از سایه</title>
 
 <style>
-body{
+*{
+    box-sizing:border-box;
     margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    width:100%;
+    height:100%;
     overflow:hidden;
-    background:#111;
-    font-family:Arial,sans-serif;
-}
-
-canvas{
-    display:block;
-    margin:auto;
-    background:#1f1f1f;
-}
-
-#restart{
-    position:fixed;
-    top:10px;
-    right:10px;
-    z-index:1000;
-    padding:10px 20px;
-    font-size:18px;
-    cursor:pointer;
-}
-#mobileControls{
-    position:fixed;
-    bottom:20px;
-    left:20px;
-    z-index:2000;
-    display:grid;
-    grid-template-columns:60px 60px 60px;
-    grid-template-rows:60px 60px;
-    gap:5px;
-}
-
-.mobileBtn{
-    width:60px;
-    height:60px;
-    border:0;
-    border-radius:15px;
-    background:rgba(255,255,255,0.25);
-    color:white;
-    font-size:28px;
-    font-weight:bold;
+    background:#050b14;
+    font-family:Tahoma,Arial,sans-serif;
     touch-action:none;
 }
 
-.mobileBtn:active{
-    background:rgba(0,150,255,0.7);
+#game{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
 }
 
-#up{
-    grid-column:2;
+canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
 }
 
-#left{
-    grid-column:1;
-    grid-row:2;
+#hud{
+    position:absolute;
+    top:12px;
+    left:12px;
+    right:12px;
+    z-index:5;
+    display:flex;
+    justify-content:space-between;
+    pointer-events:none;
 }
 
-#down{
-    grid-column:2;
-    grid-row:2;
+.hud{
+    min-width:90px;
+    padding:8px 14px;
+    text-align:center;
+    color:white;
+    background:rgba(0,0,0,.65);
+    border:1px solid #38dfff;
+    border-radius:12px;
+    font-size:12px;
 }
 
-#right{
-    grid-column:3;
-    grid-row:2;
+.hud b{
+    display:block;
+    margin-top:3px;
+    color:#5cecff;
+    font-size:19px;
 }
 
+#menu{
+    position:absolute;
+    inset:0;
+    z-index:20;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:rgba(0,0,0,.7);
+}
 
+.panel{
+    width:min(92vw,420px);
+    padding:28px 22px;
+    text-align:center;
+    color:white;
+    background:#101d31;
+    border:1px solid #38dfff;
+    border-radius:22px;
+    box-shadow:0 0 35px rgba(0,200,255,.2);
+}
+
+.panel .icon{
+    font-size:55px;
+}
+
+.panel h1{
+    color:#5cecff;
+    font-size:32px;
+    margin:10px 0 15px;
+}
+
+.panel h2{
+    font-size:28px;
+    margin:10px 0 15px;
+}
+
+.panel p{
+    color:#ccd8e7;
+    line-height:1.9;
+    font-size:14px;
+    margin:8px 0;
+}
+
+.mainButton{
+    margin-top:15px;
+    padding:14px 34px;
+    border:0;
+    border-radius:14px;
+    font-family:Tahoma,Arial,sans-serif;
+    font-size:18px;
+    font-weight:bold;
+    color:#00131c;
+    background:linear-gradient(135deg,#65efff,#269cff);
+    cursor:pointer;
+}
+
+.mainButton:active{
+    transform:scale(.94);
+}
+
+.hidden{
+    display:none !important;
+}
+
+#controls{
+    position:absolute;
+    z-index:10;
+    left:0;
+    right:0;
+    bottom:12px;
+    display:none;
+    justify-content:center;
+}
+
+.dpad{
+    width:190px;
+    height:180px;
+    position:relative;
+}
+
+.move{
+    position:absolute;
+    width:60px;
+    height:60px;
+    padding:0;
+    border-radius:16px;
+    background:rgba(15,42,72,.92);
+    border:2px solid #45dfff;
+    color:white;
+    font-size:27px;
+    user-select:none;
+    -webkit-user-select:none;
+    touch-action:none;
+}
+
+.move:active{
+    background:#17608a;
+    transform:scale(.94);
+}
+
+#btnUp{
+    left:65px;
+    top:0;
+}
+
+#btnDown{
+    left:65px;
+    bottom:0;
+}
+
+#btnLeft{
+    left:0;
+    top:60px;
+}
+
+#btnRight{
+    right:0;
+    top:60px;
+}
+
+@media(max-width:800px),(pointer:coarse){
+    #controls{
+        display:flex;
+    }
+}
 </style>
 </head>
+
 <body>
 
-<button id="restart">🔄 Restart</button>
-<div id="mobileControls">
+<div id="game">
 
-    <button class="mobileBtn" id="up">▲</button>
+<canvas id="canvas"></canvas>
 
-    <button class="mobileBtn" id="left">◀</button>
+<div id="hud">
 
-    <button class="mobileBtn" id="down">▼</button>
+    <div class="hud">
+        امتیاز
+        <b id="score">0</b>
+    </div>
 
-    <button class="mobileBtn" id="right">▶</button>
+    <div class="hud">
+        سکه
+        <b id="coinCount">0</b>
+    </div>
+
+    <div class="hud">
+        رکورد
+        <b id="best">0</b>
+    </div>
 
 </div>
-<canvas id="game" width="1000" height="600"></canvas>
+
+<div id="menu">
+
+    <div id="startPanel" class="panel">
+
+        <div class="icon">👤</div>
+
+        <h1>فرار از سایه</h1>
+
+        <p>
+            از سایه‌های سریع فرار کن و سکه‌ها را جمع کن!
+        </p>
+
+        <p>
+            کامپیوتر: W A S D یا کلیدهای جهت
+            <br>
+            گوشی: دکمه‌های پایین صفحه
+        </p>
+
+        <p>
+            رکورد:
+            <b id="startBest">0</b>
+        </p>
+
+        <button id="startButton" class="mainButton">
+            شروع بازی
+        </button>
+
+    </div>
+
+    <div id="gameOverPanel" class="panel hidden">
+
+        <div class="icon">💥</div>
+
+        <h2>Game Over</h2>
+
+        <p>
+            یکی از سایه‌ها تو را گرفت!
+        </p>
+
+        <p>
+            امتیاز:
+            <b id="finalScore">0</b>
+        </p>
+
+        <p>
+            رکورد:
+            <b id="finalBest">0</b>
+        </p>
+
+        <button id="restartButton" class="mainButton">
+            دوباره بازی
+        </button>
+
+    </div>
+
+</div>
+
+<div id="controls">
+
+    <div class="dpad">
+
+        <button class="move" id="btnUp">⬆️</button>
+
+        <button class="move" id="btnDown">⬇️</button>
+
+        <button class="move" id="btnLeft">⬅️</button>
+
+        <button class="move" id="btnRight">➡️</button>
+
+    </div>
+
+</div>
+
+</div>
 
 <script>
 
-const canvas = document.getElementById("game");
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-let state = "menu";
-
-let highScore =
-parseInt(localStorage.getItem("shadowHighScore")) || 0;
+let W = 0;
+let H = 0;
 
 const player = {
-    x:100,
-    y:100,
-    size:30,
-    speed:5
+    x:0,
+    y:0,
+    radius:18,
+    speed:360
 };
 
-const shadows = [
-    {x:900,y:100,speed:1.5},
-    {x:850,y:500,speed:1.8},
-    {x:700,y:300,speed:2.1}
-];
+let running = false;
+let lastTime = 0;
+let gameTime = 0;
 
-const obstacles = [
-    {x:250,y:120,w:250,h:30},
-    {x:550,y:200,w:30,h:250},
-    {x:700,y:100,w:180,h:30},
-    {x:150,y:450,w:300,h:30},
-    {x:820,y:320,w:30,h:180}
-];
+let score = 0;
+let coinCount = 0;
 
-let coin = {
-    x:400,
-    y:300,
-    size:15
+let best =
+    Number(localStorage.getItem("gameland_escape_best")) || 0;
+
+const input = {
+    up:false,
+    down:false,
+    left:false,
+    right:false
 };
 
-let coinsCollected = 0;
-let startTime = Date.now();
-let gameOver = false;
-let keys = {};
 
-document.addEventListener("keydown", e => {
+/* =========================
+   اندازه صفحه
+========================= */
 
-    keys[e.key.toLowerCase()] = true;
+function resize(){
 
-    if(state === "menu"){
-        state = "game";
-        startTime = Date.now();
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    canvas.width = W;
+    canvas.height = H;
+
+    if(!running){
+        player.x = W / 2;
+        player.y = H / 2;
+    }
+
+    createObstacles();
+}
+
+window.addEventListener("resize",resize);
+
+
+/* =========================
+   کیبورد
+========================= */
+
+window.addEventListener("keydown",function(e){
+
+    const key = e.key.toLowerCase();
+
+    if(key === "w" || e.key === "arrowup"){
+        input.up = true;
+        e.preventDefault();
+    }
+
+    if(key === "s" || e.key === "arrowdown"){
+        input.down = true;
+        e.preventDefault();
+    }
+
+    if(key === "a" || e.key === "arrowleft"){
+        input.left = true;
+        e.preventDefault();
+    }
+
+    if(key === "d" || e.key === "arrowright"){
+        input.right = true;
+        e.preventDefault();
     }
 
 });
 
-document.addEventListener("keyup", e => {
-    keys[e.key.toLowerCase()] = false;
+window.addEventListener("keyup",function(e){
+
+    const key = e.key.toLowerCase();
+
+    if(key === "w" || e.key === "arrowup"){
+        input.up = false;
+    }
+
+    if(key === "s" || e.key === "arrowdown"){
+        input.down = false;
+    }
+
+    if(key === "a" || e.key === "arrowleft"){
+        input.left = false;
+    }
+
+    if(key === "d" || e.key === "arrowright"){
+        input.right = false;
+    }
+
 });
 
-document.getElementById("restart").onclick =
-restartGame;
 
-function restartGame(){
+/* =========================
+   کنترل موبایل
+========================= */
 
-    player.x = 100;
-    player.y = 100;
+function mobileButton(id,direction){
 
-    shadows[0].x = 900;
-    shadows[0].y = 100;
+    const button = document.getElementById(id);
 
-    shadows[1].x = 850;
-    shadows[1].y = 500;
-
-    shadows[2].x = 700;
-    shadows[2].y = 300;
-
-    coinsCollected = 0;
-    gameOver = false;
-    state = "game";
-    startTime = Date.now();
-
-    spawnCoin();
-}
-
-function spawnCoin(){
-
-    coin.x =
-    Math.random() * (canvas.width - 50) + 20;
-
-    coin.y =
-    Math.random() * (canvas.height - 50) + 20;
-}
-
-function collideRect(a,b){
-
-    return (
-        a.x < b.x + b.w &&
-        a.x + a.size > b.x &&
-        a.y < b.y + b.h &&
-        a.y + a.size > b.y
-    );
-
-}
-const mobileButtons = {
-    up: document.getElementById("up"),
-    down: document.getElementById("down"),
-    left: document.getElementById("left"),
-    right: document.getElementById("right")
-};
-
-function mobileControl(button,key){
-
-    button.addEventListener("touchstart",function(e){
+    function press(e){
         e.preventDefault();
-        keys[key]=true;
-    });
+        input[direction] = true;
+    }
 
-    button.addEventListener("touchend",function(e){
+    function release(e){
         e.preventDefault();
-        keys[key]=false;
-    });
+        input[direction] = false;
+    }
 
-    button.addEventListener("touchcancel",function(){
-        keys[key]=false;
-    });
+    button.addEventListener("pointerdown",press);
+    button.addEventListener("pointerup",release);
+    button.addEventListener("pointercancel",release);
+    button.addEventListener("pointerleave",release);
+
+    button.addEventListener(
+        "touchstart",
+        press,
+        {passive:false}
+    );
+
+    button.addEventListener(
+        "touchend",
+        release,
+        {passive:false}
+    );
 }
 
-mobileControl(mobileButtons.up,"w");
-mobileControl(mobileButtons.down,"s");
-mobileControl(mobileButtons.left,"a");
-mobileControl(mobileButtons.right,"d");
-function update(){
+mobileButton("btnUp","up");
+mobileButton("btnDown","down");
+mobileButton("btnLeft","left");
+mobileButton("btnRight","right");
 
-    if(state !== "game") return;
-    if(gameOver) return;
 
-    let oldX = player.x;
-    let oldY = player.y;
+/* =========================
+   موانع
+========================= */
 
-    if(keys["w"]) player.y -= player.speed;
-    if(keys["s"]) player.y += player.speed;
-    if(keys["a"]) player.x -= player.speed;
-    if(keys["d"]) player.x += player.speed;
+let obstacles = [];
 
-    player.x = Math.max(
-        0,
-        Math.min(canvas.width-player.size,player.x)
-    );
+function createObstacles(){
 
-    player.y = Math.max(
-        0,
-        Math.min(canvas.height-player.size,player.y)
-    );
+    obstacles = [
 
-    obstacles.forEach(obs => {
+        {
+            x:W * 0.18,
+            y:H * 0.28,
+            w:150,
+            h:30
+        },
 
-        if(collideRect(player,obs)){
-            player.x = oldX;
-            player.y = oldY;
+        {
+            x:W * 0.68,
+            y:H * 0.20,
+            w:30,
+            h:130
+        },
+
+        {
+            x:W * 0.30,
+            y:H * 0.68,
+            w:170,
+            h:30
+        },
+
+        {
+            x:W * 0.70,
+            y:H * 0.70,
+            w:140,
+            h:30
         }
 
-    });
+    ];
+}
 
-    let seconds =
-    Math.floor((Date.now()-startTime)/1000);
 
-    shadows.forEach((shadow,index)=>{
+/* =========================
+   سایه‌ها
+========================= */
 
-        shadow.speed =
-        1.5 + index*0.5 + seconds*0.02;
+let shadows = [];
 
-        let dx = player.x - shadow.x;
-        let dy = player.y - shadow.y;
+function createShadows(){
 
-        let dist =
-        Math.sqrt(dx*dx + dy*dy);
+    shadows = [
 
-        if(dist > 0){
+        {
+            x:45,
+            y:45,
+            radius:24,
+            speed:190,
+            color:"#a855ff"
+        },
 
-            shadow.x +=
-            dx/dist * shadow.speed;
+        {
+            x:W-45,
+            y:H-45,
+            radius:24,
+            speed:205,
+            color:"#ff386c"
+        },
 
-            shadow.y +=
-            dy/dist * shadow.speed;
+        {
+            x:W-45,
+            y:45,
+            radius:23,
+            speed:200,
+            color:"#ff8b3d"
         }
 
-        if(dist < 25){
+    ];
+}
 
-            gameOver = true;
 
-            let score =
-            seconds + coinsCollected*10;
+/* =========================
+   بررسی مانع
+========================= */
 
-            if(score > highScore){
+function pointInsideObstacle(x,y,padding){
 
-                highScore = score;
+    for(const o of obstacles){
 
-                localStorage.setItem(
-                    "shadowHighScore",
-                    highScore
+        if(
+            x > o.x-padding &&
+            x < o.x+o.w+padding &&
+            y > o.y-padding &&
+            y < o.y+o.h+padding
+        ){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+/* =========================
+   سکه‌ها
+========================= */
+
+let coins = [];
+
+const MAX_COINS = 8;
+const COIN_RESPAWN_TIME = 2.5;
+
+
+/* پیدا کردن نقطه امن برای سکه */
+
+function findSafeCoinPosition(){
+
+    for(let attempt=0;attempt<150;attempt++){
+
+        const x =
+            35 +
+            Math.random() *
+            Math.max(1,W-70);
+
+        const y =
+            80 +
+            Math.random() *
+            Math.max(1,H-140);
+
+        /* نزدیک بازیکن نباشد */
+
+        if(
+            Math.hypot(
+                x-player.x,
+                y-player.y
+            ) < 120
+        ){
+            continue;
+        }
+
+        /* داخل مانع نباشد */
+
+        if(
+            pointInsideObstacle(
+                x,
+                y,
+                20
+            )
+        ){
+            continue;
+        }
+
+        /* روی سکه دیگر نباشد */
+
+        let tooClose = false;
+
+        for(const c of coins){
+
+            if(
+                !c.taken &&
+                Math.hypot(
+                    x-c.x,
+                    y-c.y
+                ) < 70
+            ){
+                tooClose = true;
+                break;
+            }
+
+        }
+
+        if(tooClose){
+            continue;
+        }
+
+        /* محل مناسب پیدا شد */
+
+        return {
+            x:x,
+            y:y
+        };
+    }
+
+    /* اگر جای مناسبی پیدا نشد */
+
+    return {
+        x:W/2,
+        y:H/2
+    };
+}
+
+
+function createCoins(){
+
+    coins = [];
+
+    for(let i=0;i<MAX_COINS;i++){
+
+        const pos =
+            findSafeCoinPosition();
+
+        coins.push({
+
+            x:pos.x,
+            y:pos.y,
+
+            radius:11,
+
+            taken:false,
+
+            respawnTimer:0,
+
+            rotation:
+                Math.random() *
+                Math.PI *
+                2
+        });
+
+    }
+}
+
+
+/* =========================
+   سکه دوباره ظاهر شود
+========================= */
+
+function respawnCoin(coin){
+
+    /* موقتاً سکه را taken می‌کنیم
+       تا خودش در بررسی فاصله حساب نشود */
+
+    coin.taken = true;
+
+    const pos =
+        findSafeCoinPosition();
+
+    coin.x = pos.x;
+    coin.y = pos.y;
+
+    coin.rotation =
+        Math.random() *
+        Math.PI *
+        2;
+
+    coin.respawnTimer = 0;
+
+    coin.taken = false;
+}
+
+
+/* =========================
+   آپدیت سکه‌ها
+========================= */
+
+function updateCoins(dt){
+
+    for(const coin of coins){
+
+        if(!coin.taken){
+
+            coin.rotation += dt * 5;
+
+            const distance =
+                Math.hypot(
+                    player.x-coin.x,
+                    player.y-coin.y
                 );
+
+            if(distance < 30){
+
+                coin.taken = true;
+
+                coin.respawnTimer =
+                    COIN_RESPAWN_TIME;
+
+                coinCount++;
+
+                score += 100;
+            }
+
+        }else{
+
+            coin.respawnTimer -= dt;
+
+            if(
+                coin.respawnTimer <= 0
+            ){
+
+                respawnCoin(coin);
+
             }
         }
 
-    });
+    }
+}
 
-    let coinDist = Math.sqrt(
-        Math.pow(player.x-coin.x,2)+
-        Math.pow(player.y-coin.y,2)
-    );
 
-    if(coinDist < 30){
+/* =========================
+   برخورد بازیکن با مانع
+========================= */
 
-        coinsCollected++;
-        spawnCoin();
+function hitObstacle(x,y,r){
+
+    for(const o of obstacles){
+
+        const closestX =
+            Math.max(
+                o.x,
+                Math.min(
+                    x,
+                    o.x+o.w
+                )
+            );
+
+        const closestY =
+            Math.max(
+                o.y,
+                Math.min(
+                    y,
+                    o.y+o.h
+                )
+            );
+
+        const dx =
+            x-closestX;
+
+        const dy =
+            y-closestY;
+
+        if(
+            dx*dx+dy*dy <
+            r*r
+        ){
+            return true;
+        }
     }
 
+    return false;
 }
 
-function drawMenu(){
 
-    ctx.fillStyle="#111";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle="white";
-    ctx.font="60px Arial";
-    ctx.fillText(
-        "ESCAPE THE SHADOW",
-        180,
-        220
-    );
+/* =========================
+   حرکت بازیکن
+========================= */
 
-    ctx.font="30px Arial";
-    ctx.fillText(
-        "Press Any Key To Start",
-        300,
-        320
-    );
+function updatePlayer(dt){
 
-}
+    let dx = 0;
+    let dy = 0;
 
-function draw(){
+    if(input.up){
+        dy -= 1;
+    }
 
-    if(state==="menu"){
-        drawMenu();
+    if(input.down){
+        dy += 1;
+    }
+
+    if(input.left){
+        dx -= 1;
+    }
+
+    if(input.right){
+        dx += 1;
+    }
+
+    if(dx === 0 && dy === 0){
         return;
     }
+
+    const length =
+        Math.hypot(dx,dy);
+
+    dx /= length;
+    dy /= length;
+
+    const move =
+        player.speed * dt;
+
+    const nextX =
+        player.x + dx*move;
+
+    const nextY =
+        player.y + dy*move;
+
+
+    if(
+        nextX-player.radius > 0 &&
+        nextX+player.radius < W &&
+        !hitObstacle(
+            nextX,
+            player.y,
+            player.radius
+        )
+    ){
+        player.x = nextX;
+    }
+
+
+    if(
+        nextY-player.radius > 0 &&
+        nextY+player.radius < H &&
+        !hitObstacle(
+            player.x,
+            nextY,
+            player.radius
+        )
+    ){
+        player.y = nextY;
+    }
+}
+
+
+/* =========================
+   سایه‌ها
+========================= */
+
+function updateShadows(dt){
+
+    for(const shadow of shadows){
+
+        let dx =
+            player.x-shadow.x;
+
+        let dy =
+            player.y-shadow.y;
+
+        const distance =
+            Math.hypot(dx,dy);
+
+        if(distance > 0){
+
+            dx /= distance;
+            dy /= distance;
+
+        }
+
+        shadow.x +=
+            dx *
+            shadow.speed *
+            dt;
+
+        shadow.y +=
+            dy *
+            shadow.speed *
+            dt;
+
+
+        shadow.x =
+            Math.max(
+                shadow.radius,
+                Math.min(
+                    W-shadow.radius,
+                    shadow.x
+                )
+            );
+
+        shadow.y =
+            Math.max(
+                shadow.radius,
+                Math.min(
+                    H-shadow.radius,
+                    shadow.y
+                )
+            );
+
+
+        const hit =
+            Math.hypot(
+                player.x-shadow.x,
+                player.y-shadow.y
+            );
+
+        if(
+            hit <
+            player.radius+
+            shadow.radius
+        ){
+
+            gameOver();
+
+            return;
+        }
+    }
+}
+
+
+/* =========================
+   رسم بازی
+========================= */
+
+function draw(){
 
     ctx.clearRect(
         0,
         0,
-        canvas.width,
-        canvas.height
+        W,
+        H
     );
 
-    ctx.fillStyle="#666";
 
-    obstacles.forEach(obs=>{
+    /* زمین */
 
-        ctx.fillRect(
-            obs.x,
-            obs.y,
-            obs.w,
-            obs.h
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
         );
 
-    });
-
-    ctx.fillStyle="gold";
-
-    ctx.beginPath();
-    ctx.arc(
-        coin.x,
-        coin.y,
-        coin.size,
+    gradient.addColorStop(
         0,
-        Math.PI*2
+        "#102947"
     );
-    ctx.fill();
 
-    ctx.fillStyle="deepskyblue";
+    gradient.addColorStop(
+        1,
+        "#050d18"
+    );
+
+    ctx.fillStyle = gradient;
 
     ctx.fillRect(
-        player.x,
-        player.y,
-        player.size,
-        player.size
+        0,
+        0,
+        W,
+        H
     );
 
-    ctx.fillStyle="black";
 
-    shadows.forEach(shadow=>{
+    /* شبکه */
+
+    ctx.strokeStyle =
+        "rgba(80,190,255,.06)";
+
+    ctx.lineWidth = 1;
+
+    for(
+        let x=0;
+        x<W;
+        x+=50
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(x,0);
+        ctx.lineTo(x,H);
+
+        ctx.stroke();
+    }
+
+    for(
+        let y=0;
+        y<H;
+        y+=50
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(0,y);
+        ctx.lineTo(W,y);
+
+        ctx.stroke();
+    }
+
+
+    /* موانع */
+
+    for(const o of obstacles){
+
+        ctx.fillStyle =
+            "#1a3857";
+
+        ctx.strokeStyle =
+            "#36dfff";
+
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+
+        ctx.rect(
+            o.x,
+            o.y,
+            o.w,
+            o.h
+        );
+
+        ctx.fill();
+        ctx.stroke();
+    }
+
+
+    /* سکه‌ها */
+
+    for(const coin of coins){
+
+        if(coin.taken){
+            continue;
+        }
+
+        ctx.save();
+
+        ctx.translate(
+            coin.x,
+            coin.y
+        );
+
+        ctx.scale(
+            Math.abs(
+                Math.cos(
+                    coin.rotation
+                )
+            )*.5+.5,
+            1
+        );
+
+        ctx.shadowColor =
+            "#ffd43b";
+
+        ctx.shadowBlur = 18;
+
+        ctx.fillStyle =
+            "#ffd43b";
 
         ctx.beginPath();
 
         ctx.arc(
-            shadow.x,
-            shadow.y,
-            18,
+            0,
+            0,
+            coin.radius,
             0,
             Math.PI*2
         );
 
         ctx.fill();
 
-    });
+        ctx.shadowBlur = 0;
 
-    let seconds =
-    Math.floor((Date.now()-startTime)/1000);
+        ctx.fillStyle =
+            "#7b5700";
 
-    let score =
-    seconds + coinsCollected*10;
+        ctx.font =
+            "bold 12px Arial";
 
-    ctx.fillStyle="white";
-    ctx.font="24px Arial";
+        ctx.textAlign =
+            "center";
 
-    ctx.fillText(
-        "Score: " + score,
-        20,
-        30
-    );
-
-    ctx.fillText(
-        "Coins: " + coinsCollected,
-        20,
-        60
-    );
-
-    ctx.fillText(
-        "High Score: " + highScore,
-        20,
-        90
-    );
-
-    if(gameOver){
-
-        ctx.fillStyle=
-        "rgba(0,0,0,0.7)";
-
-        ctx.fillRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-        ctx.fillStyle="red";
-        ctx.font="60px Arial";
+        ctx.textBaseline =
+            "middle";
 
         ctx.fillText(
-            "GAME OVER",
-            280,
-            250
+            "★",
+            0,
+            1
         );
 
-        ctx.fillStyle="white";
-        ctx.font="30px Arial";
-
-        ctx.fillText(
-            "Press Restart",
-            360,
-            320
-        );
-
+        ctx.restore();
     }
 
+
+    /* سایه‌ها */
+
+    for(const shadow of shadows){
+
+        ctx.save();
+
+        ctx.shadowColor =
+            shadow.color;
+
+        ctx.shadowBlur = 25;
+
+        ctx.fillStyle =
+            "#050505";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            shadow.x,
+            shadow.y,
+            shadow.radius,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        ctx.strokeStyle =
+            shadow.color;
+
+        ctx.lineWidth = 3;
+
+        ctx.stroke();
+
+
+        /* چشم */
+
+        ctx.fillStyle =
+            shadow.color;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            shadow.x-7,
+            shadow.y-4,
+            3,
+            0,
+            Math.PI*2
+        );
+
+        ctx.arc(
+            shadow.x+7,
+            shadow.y-4,
+            3,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+
+    /* بازیکن */
+
+    ctx.save();
+
+    ctx.shadowColor =
+        "#55eaff";
+
+    ctx.shadowBlur = 25;
+
+    const playerGradient =
+        ctx.createRadialGradient(
+            player.x-6,
+            player.y-6,
+            2,
+            player.x,
+            player.y,
+            player.radius+5
+        );
+
+    playerGradient.addColorStop(
+        0,
+        "#ffffff"
+    );
+
+    playerGradient.addColorStop(
+        .4,
+        "#8cf5ff"
+    );
+
+    playerGradient.addColorStop(
+        1,
+        "#079bd1"
+    );
+
+    ctx.fillStyle =
+        playerGradient;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        player.x,
+        player.y,
+        player.radius,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.restore();
 }
 
-function loop(){
 
-    update();
-    draw();
+/* =========================
+   شروع بازی
+========================= */
+
+function startGame(){
+
+    score = 0;
+
+    coinCount = 0;
+
+    gameTime = 0;
+
+    input.up = false;
+    input.down = false;
+    input.left = false;
+    input.right = false;
+
+    player.x =
+        W/2;
+
+    player.y =
+        H/2;
+
+    createObstacles();
+
+    createShadows();
+
+    createCoins();
+
+    document.getElementById(
+        "score"
+    ).textContent = "0";
+
+    document.getElementById(
+        "coinCount"
+    ).textContent = "0";
+
+    running = true;
+
+    document.getElementById(
+        "menu"
+    ).style.display = "none";
+
+    lastTime =
+        performance.now();
 
     requestAnimationFrame(loop);
 }
 
-spawnCoin();
-loop();
+
+/* =========================
+   Game Over
+========================= */
+
+function gameOver(){
+
+    if(!running){
+        return;
+    }
+
+    running = false;
+
+    const finalScore =
+        Math.floor(score);
+
+    if(finalScore > best){
+
+        best = finalScore;
+
+        localStorage.setItem(
+            "gameland_escape_best",
+            best
+        );
+    }
+
+    document.getElementById(
+        "finalScore"
+    ).textContent =
+        finalScore;
+
+    document.getElementById(
+        "finalBest"
+    ).textContent =
+        best;
+
+    document.getElementById(
+        "best"
+    ).textContent =
+        best;
+
+    document.getElementById(
+        "startBest"
+    ).textContent =
+        best;
+
+    document.getElementById(
+        "startPanel"
+    ).classList.add(
+        "hidden"
+    );
+
+    document.getElementById(
+        "gameOverPanel"
+    ).classList.remove(
+        "hidden"
+    );
+
+    document.getElementById(
+        "menu"
+    ).style.display =
+        "flex";
+}
+
+
+/* =========================
+   Game Loop
+========================= */
+
+function loop(time){
+
+    if(!running){
+        return;
+    }
+
+    let dt =
+        (time-lastTime)/1000;
+
+    lastTime = time;
+
+    if(dt > 0.05){
+        dt = 0.05;
+    }
+
+    gameTime += dt;
+
+    updatePlayer(dt);
+
+    updateShadows(dt);
+
+    updateCoins(dt);
+
+    score += dt*5;
+
+    document.getElementById(
+        "score"
+    ).textContent =
+        Math.floor(score);
+
+    document.getElementById(
+        "coinCount"
+    ).textContent =
+        coinCount;
+
+    draw();
+
+    if(running){
+        requestAnimationFrame(loop);
+    }
+}
+
+
+/* =========================
+   دکمه‌ها
+========================= */
+
+document.getElementById(
+    "startButton"
+).addEventListener(
+    "click",
+    startGame
+);
+
+document.getElementById(
+    "restartButton"
+).addEventListener(
+    "click",
+    startGame
+);
+
+
+/* =========================
+   شروع اولیه
+========================= */
+
+resize();
+
+createObstacles();
+
+createShadows();
+
+createCoins();
+
+document.getElementById(
+    "best"
+).textContent =
+    best;
+
+document.getElementById(
+    "startBest"
+).textContent =
+    best;
+
+draw();
 
 </script>
 
