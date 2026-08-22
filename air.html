@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,initial-scale=1.0,user-scalable=no">
+
+<title>GameLand - Air Battle</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#050b18;
+    font-family:Arial,sans-serif;
+    touch-action:none;
+}
+
+canvas{
+    display:block;
+    width:100%;
+    height:100%;
+}
+
+
+/* =========================
+   HUD
+========================= */
+
+#hud{
+    position:fixed;
+    top:10px;
+    left:10px;
+    right:10px;
+
+    display:flex;
+    justify-content:space-between;
+
+    z-index:20;
+
+    pointer-events:none;
+}
+
+.info{
+    color:white;
+    background:rgba(0,0,0,.55);
+    padding:8px 12px;
+    border-radius:12px;
+    font-size:16px;
+}
+
+
+/* =========================
+   START / GAME OVER
+========================= */
+
+#screen{
+    position:fixed;
+    inset:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    z-index:50;
+
+    background:rgba(0,0,20,.78);
+
+    color:white;
+    text-align:center;
+}
+
+.box{
+    width:90%;
+    max-width:430px;
+
+    padding:30px;
+
+    border-radius:22px;
+
+    background:#111d30;
+
+    box-shadow:0 10px 40px rgba(0,0,0,.7);
+}
+
+.box h1{
+    margin-top:0;
+    font-size:32px;
+}
+
+.box p{
+    line-height:1.8;
+}
+
+#start{
+    border:0;
+    border-radius:14px;
+
+    padding:14px 35px;
+
+    background:#168cff;
+
+    color:white;
+
+    font-size:19px;
+}
+
+
+/* =========================
+   MOBILE CONTROLS
+========================= */
+
+#mobileControls{
+    position:fixed;
+
+    bottom:18px;
+    left:0;
+    right:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 20px;
+
+    z-index:40;
+
+    pointer-events:none;
+}
+
+.moveButtons{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+
+    pointer-events:auto;
+}
+
+.mobileButton{
+    width:68px;
+    height:62px;
+
+    border:0;
+    border-radius:16px;
+
+    background:rgba(255,255,255,.25);
+
+    color:white;
+
+    font-size:28px;
+
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+
+    -webkit-tap-highlight-color:transparent;
+}
+
+#fire{
+    width:78px;
+    height:78px;
+
+    border-radius:50%;
+
+    background:rgba(255,50,50,.48);
+
+    pointer-events:auto;
+}
+
+.mobileButton:active{
+    transform:scale(.94);
+    background:rgba(30,150,255,.65);
+}
+
+#fire:active{
+    background:rgba(255,40,40,.75);
+}
+
+
+/* کنترل گوشی فقط روی صفحه‌های کوچک */
+
+@media(min-width:700px){
+
+    #mobileControls{
+        display:none;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<canvas id="game"></canvas>
+
+
+<!-- =========================
+     HUD
+========================= -->
+
+<div id="hud">
+
+    <div class="info">
+        🏆 امتیاز:
+        <span id="score">0</span>
+    </div>
+
+    <div class="info">
+        👑 رکورد:
+        <span id="best">0</span>
+    </div>
+
+    <div class="info">
+        ❤️
+        <span id="lives">3</span>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     START SCREEN
+========================= -->
+
+<div id="screen">
+
+    <div class="box">
+
+        <h1 id="title">
+            ✈️ نبرد هوایی
+        </h1>
+
+        <p id="message">
+
+            هواپیماهای دشمن از سمت راست می‌آیند!
+
+            <br><br>
+
+            کامپیوتر:
+            <br>
+            W / ↑ = بالا
+            <br>
+            S / ↓ = پایین
+            <br>
+            کلیک چپ یا Space = تیراندازی
+
+            <br><br>
+
+            گوشی:
+            <br>
+            ⬆️ = بالا
+            <br>
+            ⬇️ = پایین
+            <br>
+            🔥 = تیراندازی
+
+        </p>
+
+        <button id="start">
+            🚀 شروع بازی
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     MOBILE CONTROLS
+========================= -->
+
+<div id="mobileControls">
+
+    <div class="moveButtons">
+
+        <button
+            class="mobileButton"
+            id="up">
+            ⬆️
+        </button>
+
+        <button
+            class="mobileButton"
+            id="down">
+            ⬇️
+        </button>
+</div>
+
+
+    <button
+        class="mobileButton"
+        id="fire">
+        🔥
+    </button>
+
+</div>
+
+
+<script>
+
+
+/* =====================================================
+   CANVAS
+===================================================== */
+
+const canvas =
+document.getElementById("game");
+
+const ctx =
+canvas.getContext("2d");
+
+
+let W = 0;
+let H = 0;
+
+
+function resize(){
+
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    canvas.width = W;
+    canvas.height = H;
+
+    if(!running){
+
+        player.y = H / 2;
+    }
+}
+
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+
+/* =====================================================
+   GAME STATE
+===================================================== */
+
+let running = false;
+
+let gameOver = false;
+
+let score = 0;
+
+let lives = 3;
+
+let best =
+Number(
+    localStorage.getItem(
+        "airBattleBest"
+    ) || 0
+);
+
+
+/* =====================================================
+   PLAYER
+===================================================== */
+
+const player = {
+
+    x:70,
+
+    y:300,
+
+    width:72,
+
+    height:38,
+
+    speed:6
+};
+
+
+/* =====================================================
+   GAME ARRAYS
+===================================================== */
+
+let bullets = [];
+
+let enemies = [];
+
+let particles = [];
+
+let stars = [];
+
+
+/* =====================================================
+   INPUT
+===================================================== */
+
+const keys = {
+
+    up:false,
+
+    down:false,
+
+    fire:false
+};
+
+
+/* =====================================================
+   TIMERS
+===================================================== */
+
+let shootTimer = 0;
+
+let enemyTimer = 0;
+
+
+/* =====================================================
+   STARS
+===================================================== */
+
+function createStars(){
+
+    stars = [];
+
+    for(
+        let i=0;
+        i<130;
+        i++
+    ){
+
+        stars.push({
+
+            x:Math.random()*W,
+
+            y:Math.random()*H,
+
+            size:
+                Math.random()*2+1,
+
+            speed:
+                Math.random()*2+.5
+
+        });
+
+    }
+}
+
+
+/* =====================================================
+   KEYBOARD
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    function(e){
+
+        if(
+            e.key === "w" ||
+            e.key === "W" ||
+            e.key === "ArrowUp"
+        ){
+
+            keys.up = true;
+
+        }
+
+
+        if(
+            e.key === "s" ||
+            e.key === "S" ||
+            e.key === "ArrowDown"
+        ){
+
+            keys.down = true;
+
+        }
+
+
+        if(e.code === "Space"){
+
+            e.preventDefault();
+
+            keys.fire = true;
+
+        }
+
+
+        if(
+            e.key.toLowerCase() === "r" &&
+            gameOver
+        ){
+
+            startGame();
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    function(e){
+
+        if(
+            e.key === "w" ||
+            e.key === "W" ||
+            e.key === "ArrowUp"
+        ){
+
+            keys.up = false;
+
+        }
+
+
+        if(
+            e.key === "s" ||
+            e.key === "S" ||
+            e.key === "ArrowDown"
+        ){
+
+            keys.down = false;
+
+        }
+
+
+        if(e.code === "Space"){
+
+            keys.fire = false;
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   MOUSE
+===================================================== */
+
+canvas.addEventListener(
+    "mousedown",
+    function(e){
+
+        if(e.button === 0){
+
+            keys.fire = true;
+
+        }
+
+    }
+);
+
+
+window.addEventListener(
+    "mouseup",
+    function(e){
+
+        if(e.button === 0){
+
+            keys.fire = false;
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   MOBILE CONTROLS
+===================================================== */
+
+function setupMobileButton(
+    id,
+    key
+){
+
+    const button =
+        document.getElementById(id);
+
+
+    button.addEventListener(
+        "pointerdown",
+        function(e){
+
+            e.preventDefault();
+keys[key] = true;
+
+        }
+    );
+
+
+    button.addEventListener(
+        "pointerup",
+        function(e){
+
+            e.preventDefault();
+
+            keys[key] = false;
+
+        }
+    );
+
+
+    button.addEventListener(
+        "pointercancel",
+        function(){
+
+            keys[key] = false;
+
+        }
+    );
+
+
+    button.addEventListener(
+        "pointerleave",
+        function(){
+
+            keys[key] = false;
+
+        }
+    );
+
+}
+
+
+setupMobileButton(
+    "up",
+    "up"
+);
+
+
+setupMobileButton(
+    "down",
+    "down"
+);
+
+
+setupMobileButton(
+    "fire",
+    "fire"
+);
+
+
+/* =====================================================
+   START GAME
+===================================================== */
+
+function startGame(){
+
+    score = 0;
+
+    lives = 3;
+
+    bullets = [];
+
+    enemies = [];
+
+    particles = [];
+
+    shootTimer = 0;
+
+    /*
+       دشمن اول بعد از کمی تأخیر می‌آید
+    */
+
+    enemyTimer = 80;
+
+
+    player.x = 70;
+
+    player.y = H / 2;
+
+
+    running = true;
+
+    gameOver = false;
+
+
+    document.getElementById(
+        "screen"
+    ).style.display = "none";
+
+
+    updateHUD();
+
+}
+
+
+/* =====================================================
+   SHOOT
+===================================================== */
+
+function shoot(){
+
+    if(shootTimer > 0){
+
+        return;
+    }
+
+
+    bullets.push({
+
+        x:
+            player.x +
+            player.width,
+
+        y:
+            player.y +
+            player.height / 2 - 3,
+
+        width:20,
+
+        height:6,
+
+        speed:11
+
+    });
+
+
+    shootTimer = 10;
+
+}
+
+
+/* =====================================================
+   CREATE ENEMY
+===================================================== */
+
+function createEnemy(){
+
+    const size =
+        34 +
+        Math.random()*25;
+
+
+    enemies.push({
+
+        x:W + size,
+
+        y:
+            50 +
+            Math.random() *
+            Math.max(
+                100,
+                H - 180
+            ),
+
+        width:size,
+
+        height:size * .55,
+
+        speed:
+            2.5 +
+            Math.random()*2,
+
+        hp:1
+
+    });
+
+}
+
+
+/* =====================================================
+   COLLISION
+===================================================== */
+
+function collision(a,b){
+
+    return (
+
+        a.x < b.x + b.width &&
+
+        a.x + a.width > b.x &&
+
+        a.y < b.y + b.height &&
+
+        a.y + a.height > b.y
+
+    );
+
+}
+
+
+/* =====================================================
+   EXPLOSION
+===================================================== */
+
+function createExplosion(
+    x,
+    y
+){
+
+    for(
+        let i=0;
+        i<18;
+        i++
+    ){
+
+        particles.push({
+
+            x:x,
+
+            y:y,
+
+            vx:
+                (Math.random()-.5)*6,
+
+            vy:
+                (Math.random()-.5)*6,
+
+            life:
+                25 +
+                Math.random()*20,
+
+            size:
+                2 +
+                Math.random()*4
+
+        });
+
+    }
+
+}
+
+
+/* =====================================================
+   UPDATE
+===================================================== */
+
+function update(){
+
+    if(!running){
+
+        return;
+    }
+
+
+    /* =====================
+       PLAYER
+    ===================== */
+
+    if(keys.up){
+
+        player.y -= player.speed;
+
+    }
+
+
+    if(keys.down){
+
+        player.y += player.speed;
+
+    }
+
+
+    player.y =
+        Math.max(
+            45,
+            Math.min(
+                H - 110,
+                player.y
+            )
+        );
+
+
+    /* =====================
+       SHOOT
+    ===================== */
+
+    if(keys.fire){
+
+        shoot();
+
+    }
+
+
+    if(shootTimer > 0){
+
+        shootTimer--;
+
+    }
+
+
+    /* =====================
+       BULLETS
+    ===================== */
+
+    for(
+        let i=bullets.length-1;
+        i>=0;
+        i--
+    ){
+
+        const bullet =
+            bullets[i];
+
+
+        bullet.x +=
+            bullet.speed;
+
+
+        if(
+            bullet.x > W + 50
+        ){
+
+            bullets.splice(i,1);
+
+        }
+
+    }
+/* =====================
+       ENEMY SPAWN
+    ===================== */
+
+    enemyTimer--;
+
+
+    if(enemyTimer <= 0){
+
+        createEnemy();
+
+
+        enemyTimer =
+            Math.max(
+                28,
+                75 -
+                Math.floor(
+                    score / 5
+                )
+            );
+
+    }
+
+
+    /* =====================
+       ENEMIES
+    ===================== */
+
+    for(
+        let i=enemies.length-1;
+        i>=0;
+        i--
+    ){
+
+        const enemy =
+            enemies[i];
+
+
+        enemy.x -=
+            enemy.speed;
+
+
+        /*
+           دشمن از صفحه خارج شد
+        */
+
+        if(
+    enemy.x + enemy.width < 0
+){
+
+    enemies.splice(i,1);
+
+    continue;
+
+}
+
+
+        /*
+           برخورد با بازیکن
+        */
+
+        if(
+            collision(
+                player,
+                enemy
+            )
+        ){
+
+            createExplosion(
+
+                enemy.x +
+                enemy.width/2,
+
+                enemy.y +
+                enemy.height/2
+
+            );
+
+
+            enemies.splice(i,1);
+
+            lives--;
+
+            updateHUD();
+
+
+            if(lives <= 0){
+
+                endGame();
+
+            }
+
+        }
+
+    }
+
+
+    /* =====================
+       BULLET / ENEMY
+    ===================== */
+
+    for(
+        let i=bullets.length-1;
+        i>=0;
+        i--
+    ){
+
+        let hit = false;
+
+
+        for(
+            let j=enemies.length-1;
+            j>=0;
+            j--
+        ){
+
+            if(
+                collision(
+                    bullets[i],
+                    enemies[j]
+                )
+            ){
+
+                const enemy =
+                    enemies[j];
+
+
+                bullets.splice(i,1);
+
+                hit = true;
+
+
+                createExplosion(
+
+                    enemy.x +
+                    enemy.width/2,
+
+                    enemy.y +
+                    enemy.height/2
+
+                );
+
+
+                enemies.splice(j,1);
+
+
+                score++;
+
+
+                if(score > best){
+
+                    best = score;
+
+
+                    localStorage.setItem(
+                        "airBattleBest",
+                        best
+                    );
+
+                }
+
+
+                updateHUD();
+
+                break;
+
+            }
+
+        }
+
+
+        if(hit){
+
+            continue;
+
+        }
+
+    }
+
+
+    /* =====================
+       PARTICLES
+    ===================== */
+
+    for(
+        let i=particles.length-1;
+        i>=0;
+        i--
+    ){
+
+        const p =
+            particles[i];
+
+
+        p.x += p.vx;
+
+        p.y += p.vy;
+
+        p.life--;
+
+
+        if(p.life <= 0){
+
+            particles.splice(i,1);
+
+        }
+
+    }
+
+
+    /* =====================
+       STARS
+    ===================== */
+
+    for(
+        const star of stars
+    ){
+
+        star.x -=
+            star.speed;
+
+
+        if(star.x < 0){
+
+            star.x = W;
+
+            star.y =
+                Math.random()*H;
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   DRAW BACKGROUND
+===================================================== */
+
+function drawBackground(){
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#09244a"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#020713"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    ctx.fillStyle =
+        "white";
+
+
+    for(
+        const star of stars
+    ){
+
+        ctx.fillRect(
+
+            star.x,
+            star.y,
+            star.size,
+            star.size
+
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   DRAW PLAYER
+===================================================== */
+
+function drawPlayer(){
+ctx.save();
+
+
+    ctx.translate(
+        player.x,
+        player.y
+    );
+
+
+    /* بدنه */
+
+    ctx.fillStyle =
+        "#12c7ff";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        0,
+        player.height/2
+    );
+
+
+    ctx.lineTo(
+        45,
+        3
+    );
+
+
+    ctx.lineTo(
+        player.width,
+        player.height/2
+    );
+
+
+    ctx.lineTo(
+        45,
+        player.height-3
+    );
+
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /* بال */
+
+    ctx.fillStyle =
+        "#0878b8";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        25,
+        player.height/2
+    );
+
+
+    ctx.lineTo(
+        45,
+        player.height
+    );
+
+
+    ctx.lineTo(
+        57,
+        player.height/2
+    );
+
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /* کابین */
+
+    ctx.fillStyle =
+        "#dff9ff";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        45,
+        player.height/2,
+        8,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /* آتش */
+
+    ctx.fillStyle =
+        "orange";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        2,
+        player.height/2-6
+    );
+
+
+    ctx.lineTo(
+        -18,
+        player.height/2
+    );
+
+
+    ctx.lineTo(
+        2,
+        player.height/2+6
+    );
+
+
+    ctx.closePath();
+
+
+    ctx.fill();
+
+
+    ctx.restore();
+
+}
+
+
+/* =====================================================
+   DRAW ENEMIES
+===================================================== */
+
+function drawEnemies(){
+
+    for(
+        const enemy of enemies
+    ){
+
+        ctx.save();
+
+
+        ctx.translate(
+            enemy.x,
+            enemy.y
+        );
+
+
+        ctx.fillStyle =
+            "#e53935";
+
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+            enemy.width,
+            enemy.height/2
+        );
+
+
+        ctx.lineTo(
+            15,
+            0
+        );
+
+
+        ctx.lineTo(
+            0,
+            enemy.height/2
+        );
+
+
+        ctx.lineTo(
+            15,
+            enemy.height
+        );
+
+
+        ctx.closePath();
+
+
+        ctx.fill();
+
+
+        ctx.fillStyle =
+            "#8e1b20";
+
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+            30,
+            enemy.height/2
+        );
+
+
+        ctx.lineTo(
+            12,
+            enemy.height
+        );
+
+
+        ctx.lineTo(
+            42,
+            enemy.height/2
+        );
+
+
+        ctx.closePath();
+
+
+        ctx.fill();
+
+
+        ctx.restore();
+
+    }
+
+}
+
+
+/* =====================================================
+   DRAW BULLETS
+===================================================== */
+
+function drawBullets(){
+
+    ctx.fillStyle =
+        "#ffe600";
+
+
+    for(
+        const bullet of bullets
+    ){
+
+        ctx.fillRect(
+
+            bullet.x,
+            bullet.y,
+            bullet.width,
+            bullet.height
+
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   DRAW PARTICLES
+===================================================== */
+
+function drawParticles(){
+
+    for(
+        const p of particles
+    ){
+
+        ctx.fillStyle =
+            "orange";
+
+
+        ctx.fillRect(
+
+            p.x,
+            p.y,
+            p.size,
+            p.size
+
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   HUD
+===================================================== */
+
+function updateHUD(){
+
+    document.getElementById(
+        "score"
+    ).textContent =
+        score;
+
+
+    document.getElementById(
+        "best"
+    ).textContent =
+        best;
+
+
+    document.getElementById(
+        "lives"
+    ).textContent =
+        lives;
+
+}
+
+
+/* =====================================================
+   GAME OVER
+===================================================== */
+
+function endGame(){
+
+    if(gameOver){
+
+        return;
+    }
+
+
+    gameOver = true;
+
+    running = false;
+
+
+    document.getElementById(
+        "title"
+    ).textContent =
+        "💥 بازی تمام شد";
+
+
+    document.getElementById(
+        "message"
+    ).innerHTML =
+
+        "امتیاز شما: <b>" +
+        score +
+        "</b><br><br>" +
+
+        "🏆 رکورد: <b>" +
+        best +
+        "</b><br><br>" +
+"برای بازی دوباره دکمه زیر را بزن.";
+
+
+    document.getElementById(
+        "start"
+    ).textContent =
+        "🔄 دوباره بازی";
+
+
+    document.getElementById(
+        "screen"
+    ).style.display =
+        "flex";
+
+}
+
+
+/* =====================================================
+   DRAW
+===================================================== */
+
+function draw(){
+
+    drawBackground();
+
+
+    if(running){
+
+        drawPlayer();
+
+        drawEnemies();
+
+        drawBullets();
+
+        drawParticles();
+
+    }
+
+}
+
+
+/* =====================================================
+   GAME LOOP
+===================================================== */
+
+function gameLoop(){
+
+    update();
+
+    draw();
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =====================================================
+   INITIALIZE
+===================================================== */
+
+resize();
+
+createStars();
+
+updateHUD();
+
+gameLoop();
+
+
+/* =====================================================
+   START BUTTON
+===================================================== */
+
+document.getElementById(
+    "start"
+).addEventListener(
+    "click",
+    startGame
+);
+
+</script>
+
+</body>
+</html>
+
