@@ -1,0 +1,2489 @@
+```html
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GameLand Fight V5 2D</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    overflow:hidden;
+    background:#080808;
+    color:white;
+    font-family:Tahoma,Arial,sans-serif;
+}
+
+canvas{
+    display:block;
+    width:100vw;
+    height:100vh;
+}
+
+button{
+    font-family:inherit;
+}
+
+/* ================= MENU ================= */
+
+#menu{
+    position:fixed;
+    inset:0;
+    z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+    radial-gradient(circle,#292929,#070707 75%);
+}
+
+.panel{
+    width:min(900px,95vw);
+    max-height:94vh;
+    overflow:auto;
+    background:#151515;
+    border:2px solid #444;
+    border-radius:25px;
+    padding:25px;
+    text-align:center;
+    box-shadow:0 25px 90px #000;
+}
+
+h1{
+    margin:5px 0;
+    font-size:36px;
+}
+
+.subtitle{
+    color:#aaa;
+    margin-bottom:20px;
+}
+
+.section{
+    margin:18px 0;
+}
+
+.section h2{
+    margin:8px;
+    font-size:19px;
+}
+
+.options{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.option{
+    width:135px;
+    padding:13px;
+    background:#202020;
+    border:2px solid #444;
+    border-radius:15px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.option:hover{
+    transform:translateY(-3px);
+}
+
+.option.selected{
+    border-color:#00d9ff;
+    background:#10333b;
+    box-shadow:0 0 18px rgba(0,217,255,.25);
+}
+
+.icon{
+    font-size:45px;
+}
+
+.skin{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    margin:auto;
+    border:4px solid #222;
+}
+
+.map{
+    height:60px;
+    border-radius:10px;
+    margin-bottom:7px;
+}
+
+#startBtn{
+    margin-top:12px;
+    width:260px;
+    padding:15px;
+    border:0;
+    border-radius:14px;
+    background:#00d5ed;
+    font-size:20px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* ================= HUD ================= */
+
+#hud{
+    position:fixed;
+    inset:0;
+    z-index:5;
+    display:none;
+    pointer-events:none;
+}
+
+.top{
+    position:absolute;
+    top:12px;
+    left:50%;
+    transform:translateX(-50%);
+    width:min(900px,94vw);
+    display:flex;
+    gap:12px;
+    align-items:center;
+}
+
+.hpBox{
+    flex:1;
+}
+
+.name{
+    font-weight:bold;
+    margin-bottom:4px;
+}
+
+.hp{
+    height:23px;
+    border:2px solid #555;
+    border-radius:20px;
+    background:#111;
+    overflow:hidden;
+}
+
+.fill{
+    height:100%;
+    width:100%;
+    transition:.15s;
+}
+
+#pHP{
+    background:linear-gradient(90deg,#00e5ff,#0878ff);
+}
+
+#eHP{
+    background:linear-gradient(90deg,#ff4242,#970000);
+}
+
+#timer{
+    min-width:65px;
+    font-size:29px;
+    text-align:center;
+    font-weight:bold;
+    text-shadow:0 2px 7px black;
+}
+
+#combo{
+    position:absolute;
+    top:90px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:26px;
+    font-weight:bold;
+    opacity:0;
+}
+
+#specialText{
+    position:absolute;
+    bottom:60px;
+    left:50%;
+    transform:translateX(-50%);
+    font-weight:bold;
+}
+
+#special{
+    position:absolute;
+    bottom:32px;
+    left:50%;
+    transform:translateX(-50%);
+    width:270px;
+    height:18px;
+    border:2px solid white;
+    border-radius:20px;
+    background:#111;
+    overflow:hidden;
+}
+
+#specialFill{
+    width:0%;
+    height:100%;
+    background:linear-gradient(
+        90deg,
+        #7800ff,
+        #ff00aa,
+        #ffff00
+    );
+}
+
+/* ================= CONTROLS ================= */
+
+#controls{
+    position:absolute;
+    left:12px;
+    bottom:12px;
+    width:280px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    pointer-events:auto;
+}
+
+.ctrl{
+    width:60px;
+    height:50px;
+    border:1px solid #777;
+    border-radius:12px;
+    background:rgba(20,20,20,.75);
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    touch-action:none;
+}
+
+.ctrl:active{
+    background:#444;
+}
+
+/* ================= RESULT ================= */
+
+#result{
+    position:fixed;
+    inset:0;
+    z-index:30;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.78);
+}
+
+.resultBox{
+    width:min(430px,90vw);
+    padding:32px;
+    border-radius:22px;
+    background:#171717;
+    border:2px solid #555;
+    text-align:center;
+}
+
+.resultBox h2{
+    font-size:34px;
+    margin:0 0 18px;
+}
+
+.resultBtn{
+    border:0;
+    border-radius:12px;
+    padding:13px 23px;
+    margin:5px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.restart{
+    background:#00d5ed;
+}
+
+.menuBtn{
+    background:#444;
+    color:white;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:600px){
+
+    .panel{
+        padding:17px;
+    }
+
+    h1{
+        font-size:28px;
+    }
+
+    .option{
+        width:110px;
+    }
+
+    .icon{
+        font-size:38px;
+    }
+
+    #controls{
+        width:245px;
+        left:6px;
+        bottom:6px;
+    }
+
+    .ctrl{
+        width:53px;
+        height:45px;
+    }
+
+    #special{
+        width:210px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= MENU ================= -->
+
+<div id="menu">
+
+<div class="panel">
+
+<h1>🥊 GAME LAND FIGHT V5</h1>
+
+<div class="subtitle">
+نسخه کاملاً دوبعدی
+</div>
+
+<!-- CHARACTER -->
+
+<div class="section">
+
+<h2>👤 انتخاب شخصیت</h2>
+
+<div class="options">
+
+<div
+class="option selected"
+id="male"
+onclick="gender='male';select(this,'gender')">
+
+<div class="icon">🧑</div>
+مرد
+
+</div>
+
+<div
+class="option"
+id="female"
+onclick="gender='female';select(this,'gender')">
+
+<div class="icon">👩</div>
+زن
+
+</div>
+
+</div>
+</div>
+
+<!-- SKIN -->
+
+<div class="section">
+
+<h2>🎨 ظاهر</h2>
+
+<div class="options">
+
+<div
+class="option selected"
+onclick="skin=0;select(this,'skin')">
+
+<div class="skin"
+style="background:#1681ff">
+</div>
+آبی
+
+</div>
+
+<div
+class="option"
+onclick="skin=1;select(this,'skin')">
+
+<div class="skin"
+style="background:#e53935">
+</div>
+قرمز
+
+</div>
+
+<div
+class="option"
+onclick="skin=2;select(this,'skin')">
+
+<div class="skin"
+style="background:#16a34a">
+</div>
+سبز
+
+</div>
+
+<div
+class="option"
+onclick="skin=3;select(this,'skin')">
+
+<div class="skin"
+style="background:#9333ea">
+</div>
+بنفش
+
+</div>
+
+</div>
+</div>
+
+<!-- MAP -->
+
+<div class="section">
+
+<h2>🗺️ مپ</h2>
+
+<div class="options">
+
+<div
+class="option selected"
+onclick="mapType=0;select(this,'map')">
+
+<div
+class="map"
+style="background:linear-gradient(#222,#777,#333)">
+</div>
+🏟️ رینگ
+
+</div>
+
+<div
+class="option"
+onclick="mapType=1;select(this,'map')">
+
+<div
+class="map"
+style="background:linear-gradient(#55b8ed,#d5aa62)">
+</div>
+🏜️ بیابان
+
+</div>
+
+<div
+class="option"
+onclick="mapType=2;select(this,'map')">
+
+<div
+class="map"
+style="background:linear-gradient(#05051b,#253e8a)">
+</div>
+🌃 شهر
+
+</div>
+
+<div
+class="option"
+onclick="mapType=3;select(this,'map')">
+
+<div
+class="map"
+style="background:linear-gradient(#193d25,#5d873e)">
+</div>
+🌲 جنگل
+
+</div>
+
+</div>
+</div>
+
+<!-- DIFFICULTY -->
+
+<div class="section">
+
+<h2>🤖 سختی</h2>
+
+<div class="options">
+
+<div
+class="option selected"
+onclick="difficulty=0;select(this,'difficulty')">
+
+<div class="icon">🙂</div>
+آسان
+
+</div>
+
+<div
+class="option"
+onclick="difficulty=1;select(this,'difficulty')">
+
+<div class="icon">😎</div>
+متوسط
+
+</div>
+
+<div
+class="option"
+onclick="difficulty=2;select(this,'difficulty')">
+
+<div class="icon">🔥</div>
+سخت
+
+</div>
+
+</div>
+</div>
+
+<button
+id="startBtn"
+onclick="startGame()">
+شروع مبارزه 🔥
+</button>
+
+</div>
+</div>
+
+<!-- ================= HUD ================= -->
+
+<div id="hud">
+
+<div class="top">
+
+<div class="hpBox">
+
+<div class="name">
+بازیکن
+</div>
+
+<div class="hp">
+<div
+id="pHP"
+class="fill">
+</div>
+</div>
+
+</div>
+
+<div id="timer">
+60
+</div>
+
+<div class="hpBox">
+
+<div class="name">
+🤖 حریف
+</div>
+
+<div class="hp">
+<div
+id="eHP"
+class="fill">
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div id="combo">
+🔥 COMBO x2
+</div>
+
+<div id="specialText">
+⚡ قدرت ویژه 0%
+</div>
+
+<div id="special">
+<div id="specialFill"></div>
+</div>
+
+<div id="controls">
+
+<button
+class="ctrl"
+data-key="a">
+◀
+</button>
+
+<button
+class="ctrl"
+data-key="d">
+▶
+</button>
+
+<button
+class="ctrl"
+data-key="w">
+⬆️
+</button>
+
+<button
+class="ctrl"
+data-key="s">
+⬇️
+</button>
+
+<button
+class="ctrl"
+data-key="space">
+⬆️
+</button>
+
+<button
+class="ctrl"
+id="punch">
+🥊
+</button>
+
+<button
+class="ctrl"
+id="heavy">
+💥
+</button>
+
+<button
+class="ctrl"
+id="defend">
+🛡️
+</button>
+
+<button
+class="ctrl"
+id="specialBtn">
+⚡
+</button>
+
+</div>
+
+</div>
+
+<!-- RESULT -->
+
+<div id="result">
+
+<div class="resultBox">
+
+<h2 id="resultTitle">
+پایان
+</h2>
+
+<div id="resultText"></div>
+
+<br>
+
+<button
+class="resultBtn restart"
+onclick="restartGame()">
+🔄 دوباره
+</button>
+
+<button
+class="resultBtn menuBtn"
+onclick="location.reload()">
+🗺️ منو
+</button>
+
+</div>
+
+</div>
+
+<canvas id="game"></canvas>
+
+<script>
+
+/* =====================================================
+   SETTINGS
+===================================================== */
+
+let gender='male';
+let skin=0;
+let mapType=0;
+let difficulty=0;
+
+let canvas=
+    document.getElementById('game');
+
+let ctx=
+    canvas.getContext('2d');
+
+let W=innerWidth;
+let H=innerHeight;
+
+let player;
+let enemy;
+
+let running=false;
+let gameOver=false;
+
+let keys={};
+
+let defending=false;
+
+let playerCooldown=0;
+let enemyCooldown=0;
+
+let playerAttack=0;
+let enemyAttack=0;
+
+let combo=0;
+let comboTimer=0;
+
+let special=0;
+
+let playerHP=100;
+let enemyHP=100;
+
+let timeLeft=60;
+
+let timerID;
+
+let particles=[];
+
+let hitTexts=[];
+
+let shake=0;
+
+let groundY=0;
+
+/* رنگ‌ها */
+
+const skins=[
+    '#1681ff',
+    '#e53935',
+    '#16a34a',
+    '#9333ea'
+];
+
+/* =====================================================
+   MENU SELECT
+===================================================== */
+
+function select(element,type){
+
+    const parent=
+        element.parentElement;
+
+    [...parent.children]
+    .forEach(
+        x=>x.classList.remove('selected')
+    );
+
+    element.classList.add('selected');
+}
+
+/* =====================================================
+   RESIZE
+===================================================== */
+
+function resize(){
+
+    W=innerWidth;
+    H=innerHeight;
+
+    const dpr=
+        Math.min(
+            window.devicePixelRatio||1,
+            2
+        );
+
+    canvas.width=
+        W*dpr;
+
+    canvas.height=
+        H*dpr;
+
+    canvas.style.width=
+        W+'px';
+
+    canvas.style.height=
+        H+'px';
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+    groundY=
+        H*.78;
+}
+
+addEventListener(
+    'resize',
+    resize
+);
+
+resize();
+
+/* =====================================================
+   PLAYER OBJECT
+===================================================== */
+
+function makeFighter(
+    x,
+    color,
+    isPlayer
+){
+
+    return {
+
+        x:x,
+
+        y:groundY,
+
+        vx:0,
+
+        vy:0,
+
+        width:58,
+
+        height:135,
+
+        color:color,
+
+        isPlayer:isPlayer,
+
+        facing:isPlayer?1:-1,
+
+        attack:0,
+
+        attackType:0,
+
+        block:false,
+
+        jump:false,
+
+        walk:0,
+
+        hitFlash:0
+    };
+}
+
+/* =====================================================
+   START
+===================================================== */
+
+function startGame(){
+
+    document
+    .getElementById('menu')
+    .style.display='none';
+
+    document
+    .getElementById('hud')
+    .style.display='block';
+
+    player=
+        makeFighter(
+            W*.28,
+            skins[skin],
+            true
+        );
+
+    enemy=
+        makeFighter(
+            W*.72,
+            '#d62828',
+            false
+        );
+
+    playerHP=100;
+    enemyHP=100;
+
+    special=0;
+
+    combo=0;
+
+    comboTimer=0;
+
+    playerCooldown=0;
+    enemyCooldown=0;
+
+    timeLeft=60;
+
+    gameOver=false;
+    running=true;
+
+    updateHUD();
+
+    clearInterval(timerID);
+
+    timerID=
+        setInterval(
+            ()=>{
+
+                if(
+                    !running ||
+                    gameOver
+                )
+                    return;
+
+                timeLeft--;
+
+                document
+                .getElementById(
+                    'timer'
+                )
+                .textContent=
+                    timeLeft;
+
+                if(timeLeft<=0)
+                    finish();
+
+            },
+            1000
+        );
+
+    requestAnimationFrame(loop);
+}
+
+/* =====================================================
+   RESTART
+===================================================== */
+
+function restartGame(){
+
+    document
+    .getElementById('result')
+    .style.display='none';
+
+    startGame();
+}
+
+/* =====================================================
+   KEYBOARD
+===================================================== */
+
+addEventListener(
+    'keydown',
+    e=>{
+
+        let k=
+            e.key.toLowerCase();
+
+        keys[k]=true;
+
+        if(k==='j')
+            attack(10,1);
+
+        if(k==='k')
+            attack(18,2);
+
+        if(k==='u')
+            specialAttack();
+
+        if(k==='l')
+            defending=true;
+
+        if(k===' ')
+            jump();
+
+    }
+);
+
+addEventListener(
+    'keyup',
+    e=>{
+
+        let k=
+            e.key.toLowerCase();
+
+        keys[k]=false;
+
+        if(k==='l')
+            defending=false;
+    }
+);
+
+/* =====================================================
+   TOUCH
+===================================================== */
+
+document
+.querySelectorAll(
+    '.ctrl[data-key]'
+)
+.forEach(
+    button=>{
+
+        const key=
+            button.dataset.key;
+
+        button.addEventListener(
+            'pointerdown',
+            e=>{
+                e.preventDefault();
+
+                if(key==='space')
+                    jump();
+                else
+                    keys[key]=true;
+            }
+        );
+
+        button.addEventListener(
+            'pointerup',
+            ()=>{
+                keys[key]=false;
+            }
+        );
+
+        button.addEventListener(
+            'pointerleave',
+            ()=>{
+                keys[key]=false;
+            }
+        );
+    }
+);
+
+document
+.getElementById('punch')
+.addEventListener(
+    'pointerdown',
+    ()=>attack(10,1)
+);
+
+document
+.getElementById('heavy')
+.addEventListener(
+    'pointerdown',
+    ()=>attack(18,2)
+);
+
+document
+.getElementById('specialBtn')
+.addEventListener(
+    'pointerdown',
+    specialAttack
+);
+
+const defBtn=
+    document.getElementById(
+        'defend'
+    );
+
+defBtn.addEventListener(
+    'pointerdown',
+    ()=>{
+        defending=true;
+    }
+);
+
+defBtn.addEventListener(
+    'pointerup',
+    ()=>{
+        defending=false;
+    }
+);
+
+defBtn.addEventListener(
+    'pointerleave',
+    ()=>{
+        defending=false;
+    }
+);
+
+/* =====================================================
+   JUMP
+===================================================== */
+
+function jump(){
+
+    if(
+        !running ||
+        gameOver
+    )
+        return;
+
+    if(
+        Math.abs(
+            player.y-groundY
+        )<3
+    ){
+
+        player.vy=-14;
+        player.jump=true;
+    }
+}
+
+/* =====================================================
+   ATTACK
+===================================================== */
+
+function attack(
+    damage,
+    type
+){
+
+    if(
+        !running ||
+        gameOver ||
+        playerCooldown>0
+    )
+        return;
+
+    playerAttack=.3;
+
+    player.attackType=type;
+
+    playerCooldown=
+        type===2
+        ? .65
+        : .32;
+
+    combo++;
+
+    comboTimer=1.1;
+
+    special=
+        Math.min(
+            100,
+            special+12
+        );
+
+    const distance=
+        Math.abs(
+            player.x-
+            enemy.x
+        );
+
+    if(
+        distance<115 &&
+        Math.abs(
+            player.y-
+            enemy.y
+        )<50
+    ){
+
+        let finalDamage=
+            damage;
+
+        if(enemy.block)
+            finalDamage=2;
+
+        enemyHP-=finalDamage;
+
+        enemy.hitFlash=.18;
+
+        shake=
+            type===2
+            ? 9
+            : 5;
+
+        hitTexts.push({
+
+            x:enemy.x,
+
+            y:enemy.y-120,
+
+            text:'-'+finalDamage,
+
+            life:.55
+        });
+
+        createParticles(
+            enemy.x,
+            enemy.y-75,
+            type===2?18:10
+        );
+
+        if(enemyHP<=0)
+            finish();
+    }
+
+    updateHUD();
+}
+
+/* =====================================================
+   SPECIAL
+===================================================== */
+
+function specialAttack(){
+
+    if(
+        !running ||
+        gameOver ||
+        special<100
+    )
+        return;
+
+    special=0;
+
+    playerAttack=.5;
+
+    const distance=
+        Math.abs(
+            player.x-
+            enemy.x
+        );
+
+    if(
+        distance<180
+    ){
+
+        let damage=
+            enemy.block
+            ? 8
+            : 35;
+
+        enemyHP-=damage;
+
+        enemy.hitFlash=.3;
+
+        shake=14;
+
+        hitTexts.push({
+
+            x:enemy.x,
+
+            y:enemy.y-130,
+
+            text:'⚡ -'+damage,
+
+            life:.8
+        });
+
+        createParticles(
+            enemy.x,
+            enemy.y-70,
+            35
+        );
+
+        if(enemyHP<=0)
+            finish();
+    }
+
+    updateHUD();
+}
+
+/* =====================================================
+   ENEMY AI
+===================================================== */
+
+function enemyAI(dt){
+
+    if(
+        !running ||
+        gameOver
+    )
+        return;
+
+    let distance=
+        player.x-
+        enemy.x;
+
+    let abs=
+        Math.abs(distance);
+
+    let speed;
+
+    if(difficulty===0)
+        speed=1.2;
+
+    if(difficulty===1)
+        speed=1.8;
+
+    if(difficulty===2)
+        speed=2.5;
+
+    enemy.facing=
+        distance>0
+        ? 1
+        : -1;
+
+    if(abs>100){
+
+        enemy.x+=
+            Math.sign(distance)*
+            speed;
+
+        enemy.walk+=dt*8;
+
+    }else{
+
+        enemyCooldown-=dt;
+
+        /* سختی بالا گاهی دفاع می‌کند */
+
+        if(
+            difficulty>=1 &&
+            Math.random()<.012
+        ){
+
+            enemy.block=true;
+
+            setTimeout(
+                ()=>{
+                    enemy.block=false;
+                },
+                350
+            );
+        }
+
+        if(
+            enemyCooldown<=0
+        ){
+
+            enemyCooldown=
+                difficulty===0
+                ? 1.5
+                : difficulty===1
+                ? .95
+                : .65;
+
+            enemyAttack=.28;
+
+            let damage;
+
+            if(difficulty===0)
+                damage=7;
+
+            else if(difficulty===1)
+                damage=10;
+
+            else
+                damage=14;
+
+            if(defending)
+                damage=2;
+
+            playerHP-=damage;
+
+            player.hitFlash=.18;
+
+            shake=5;
+
+            hitTexts.push({
+
+                x:player.x,
+
+                y:player.y-120,
+
+                text:'-'+damage,
+
+                life:.5
+            });
+
+            createParticles(
+                player.x,
+                player.y-70,
+                10
+            );
+
+            if(playerHP<=0)
+                finish();
+
+            updateHUD();
+        }
+    }
+}
+
+/* =====================================================
+   UPDATE
+===================================================== */
+
+function update(){
+
+    if(
+        !running ||
+        gameOver
+    )
+        return;
+
+    /* حرکت */
+
+    if(keys['a']){
+
+        player.x-=4;
+
+        player.facing=-1;
+
+        player.walk+=.2;
+    }
+
+    if(keys['d']){
+
+        player.x+=4;
+
+        player.facing=1;
+
+        player.walk+=.2;
+    }
+
+    /* حرکت عمودی */
+
+    player.vy+=.65;
+
+    player.y+=player.vy;
+
+    if(player.y>=groundY){
+
+        player.y=groundY;
+
+        player.vy=0;
+
+        player.jump=false;
+    }
+
+    /* مرز */
+
+    player.x=
+        Math.max(
+            45,
+            Math.min(
+                W-45,
+                player.x
+            )
+        );
+
+    enemy.x=
+        Math.max(
+            45,
+            Math.min(
+                W-45,
+                enemy.x
+            )
+        );
+
+    /* cooldown */
+
+    playerCooldown=
+        Math.max(
+            0,
+            playerCooldown-.016
+        );
+
+    enemyCooldown=
+        Math.max(
+            0,
+            enemyCooldown-.016
+        );
+
+    playerAttack=
+        Math.max(
+            0,
+            playerAttack-.016
+        );
+
+    enemyAttack=
+        Math.max(
+            0,
+            enemyAttack-.016
+        );
+
+    comboTimer-=.016;
+
+    if(comboTimer<=0)
+        combo=0;
+
+    if(player.hitFlash>0)
+        player.hitFlash-=.016;
+
+    if(enemy.hitFlash>0)
+        enemy.hitFlash-=.016;
+
+    enemyAI(.016);
+
+    updateParticles();
+
+    updateTexts();
+}
+
+/* =====================================================
+   PARTICLES
+===================================================== */
+
+function createParticles(
+    x,
+    y,
+    amount
+){
+
+    for(
+        let i=0;
+        i<amount;
+        i++
+    ){
+
+        particles.push({
+
+            x:x,
+
+            y:y,
+
+            vx:
+                (Math.random()-.5)*
+                9,
+
+            vy:
+                (Math.random()-.5)*
+                9,
+
+            life:
+                .35+
+                Math.random()*.35
+        });
+    }
+}
+
+function updateParticles(){
+
+    for(
+        let i=particles.length-1;
+        i>=0;
+        i--
+    ){
+
+        const p=
+            particles[i];
+
+        p.x+=p.vx;
+        p.y+=p.vy;
+
+        p.vy+=.3;
+
+        p.life-=.016;
+
+        if(p.life<=0)
+            particles.splice(i,1);
+    }
+}
+
+function updateTexts(){
+
+    for(
+        let i=hitTexts.length-1;
+        i>=0;
+        i--
+    ){
+
+        const t=
+            hitTexts[i];
+
+        t.y-=1.2;
+
+        t.life-=.016;
+
+        if(t.life<=0)
+            hitTexts.splice(i,1);
+    }
+}
+
+/* =====================================================
+   DRAW BACKGROUND
+===================================================== */
+
+function drawBackground(){
+
+    if(mapType===0)
+        drawRing();
+
+    if(mapType===1)
+        drawDesert();
+
+    if(mapType===2)
+        drawCity();
+
+    if(mapType===3)
+        drawForest();
+}
+
+/* =====================================================
+   RING MAP
+===================================================== */
+
+function drawRing(){
+
+    const grad=
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+    grad.addColorStop(
+        0,
+        '#182838'
+    );
+
+    grad.addColorStop(
+        .7,
+        '#555'
+    );
+
+    grad.addColorStop(
+        1,
+        '#171717'
+    );
+
+    ctx.fillStyle=grad;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    /* نورها */
+
+    for(
+        let i=0;
+        i<7;
+        i++
+    ){
+
+        ctx.fillStyle=
+            'rgba(255,255,255,.08)';
+
+        ctx.fillRect(
+            i*W/7,
+            0,
+            50,
+            H*.6
+        );
+    }
+
+    drawGround(
+        '#292929'
+    );
+
+    /* طناب‌ها */
+
+    ctx.strokeStyle='#ddd';
+    ctx.lineWidth=5;
+
+    for(
+        let y of
+        [
+            groundY-150,
+            groundY-105,
+            groundY-60
+        ]
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            y
+        );
+
+        ctx.lineTo(
+            W,
+            y
+        );
+
+        ctx.stroke();
+    }
+}
+
+/* =====================================================
+   DESERT
+===================================================== */
+
+function drawDesert(){
+
+    const grad=
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+    grad.addColorStop(
+        0,
+        '#4da9df'
+    );
+
+    grad.addColorStop(
+        .65,
+        '#d9b36a'
+    );
+
+    grad.addColorStop(
+        1,
+        '#895d2c'
+    );
+
+    ctx.fillStyle=grad;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    /* خورشید */
+
+    ctx.fillStyle='#ffd45c';
+
+    ctx.beginPath();
+
+    ctx.arc(
+        W*.78,
+        H*.2,
+        45,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    drawGround(
+        '#9a6b35'
+    );
+
+    /* سنگ‌ها */
+
+    for(
+        let i=0;
+        i<12;
+        i++
+    ){
+
+        let x=
+            (i*137)%W;
+
+        ctx.fillStyle='#654727';
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            groundY-20-
+            (i%3)*8,
+            15+
+            (i%4)*5,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+}
+
+/* =====================================================
+   CITY
+===================================================== */
+
+function drawCity(){
+
+    ctx.fillStyle='#050719';
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    /* ماه */
+
+    ctx.fillStyle='#eeeecc';
+
+    ctx.beginPath();
+
+    ctx.arc(
+        W*.8,
+        H*.18,
+        35,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* ساختمان‌ها */
+
+    for(
+        let i=0;
+        i<14;
+        i++
+    ){
+
+        let bw=
+            60+
+            (i%4)*25;
+
+        let bh=
+            130+
+            (i%5)*35;
+
+        let x=
+            i*90-
+            20;
+
+        ctx.fillStyle=
+            i%2
+            ? '#171b2c'
+            : '#20253a';
+
+        ctx.fillRect(
+            x,
+            groundY-bh,
+            bw,
+            bh
+        );
+
+        for(
+            let y=
+                groundY-bh+20;
+            y<
+                groundY-15;
+            y+=28
+        ){
+
+            ctx.fillStyle=
+                '#ffd85c';
+
+            ctx.fillRect(
+                x+10,
+                y,
+                10,
+                12
+            );
+
+            ctx.fillRect(
+                x+35,
+                y,
+                10,
+                12
+            );
+        }
+    }
+
+    drawGround(
+        '#10131d'
+    );
+}
+
+/* =====================================================
+   FOREST
+===================================================== */
+
+function drawForest(){
+
+    const grad=
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+    grad.addColorStop(
+        0,
+        '#1d3d2a'
+    );
+
+    grad.addColorStop(
+        1,
+        '#07150c'
+    );
+
+    ctx.fillStyle=grad;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    drawGround(
+        '#17351d'
+    );
+
+    for(
+        let i=0;
+        i<18;
+        i++
+    ){
+
+        let x=
+            (i*107)%W;
+
+        let h=
+            90+
+            (i%4)*25;
+
+        ctx.fillStyle='#56351e';
+
+        ctx.fillRect(
+            x,
+            groundY-h,
+            18,
+            h
+        );
+
+        ctx.fillStyle='#1d7135';
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x+9,
+            groundY-h,
+            40,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+}
+
+/* =====================================================
+   GROUND
+===================================================== */
+
+function drawGround(color){
+
+    ctx.fillStyle=color;
+
+    ctx.fillRect(
+        0,
+        groundY,
+        W,
+        H-groundY
+    );
+}
+
+/* =====================================================
+   DRAW FIGHTER
+===================================================== */
+
+function drawFighter(f){
+
+    const x=f.x;
+    const y=f.y;
+
+    ctx.save();
+
+    ctx.translate(
+        x,
+        y
+    );
+
+    ctx.scale(
+        f.facing,
+        1
+    );
+
+    /* سایه */
+
+    ctx.fillStyle=
+        'rgba(0,0,0,.35)';
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        4,
+        38,
+        10,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* بدن */
+
+    ctx.fillStyle=
+        f.hitFlash>0
+        ? '#ffffff'
+        : f.color;
+
+    ctx.fillRect(
+        -27,
+        -105,
+        54,
+        68
+    );
+
+    /* کمربند */
+
+    ctx.fillStyle='#151515';
+
+    ctx.fillRect(
+        -28,
+        -45,
+        56,
+        13
+    );
+
+    /* سر */
+
+    ctx.fillStyle=
+        f.isPlayer &&
+        gender==='female'
+        ? '#d08a72'
+        : '#b87962';
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -132,
+        24,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* مو */
+
+    ctx.fillStyle='#171717';
+
+    if(
+        f.isPlayer &&
+        gender==='female'
+    ){
+
+        ctx.beginPath();
+
+        ctx.arc(
+            0,
+            -142,
+            27,
+            Math.PI,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.fillRect(
+            -27,
+            -142,
+            9,
+            35
+        );
+
+        ctx.fillRect(
+            18,
+            -142,
+            9,
+            35
+        );
+
+    }else{
+
+        ctx.beginPath();
+
+        ctx.arc(
+            0,
+            -140,
+            25,
+            Math.PI,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+
+    /* چشم */
+
+    ctx.fillStyle='#111';
+
+    ctx.fillRect(
+        8,
+        -136,
+        5,
+        5
+    );
+
+    /* پاها */
+
+    ctx.fillStyle='#171717';
+
+    ctx.fillRect(
+        -21,
+        -35,
+        17,
+        39
+    );
+
+    ctx.fillRect(
+        4,
+        -35,
+        17,
+        39
+    );
+
+    /* کفش */
+
+    ctx.fillRect(
+        -25,
+        0,
+        24,
+        10
+    );
+
+    ctx.fillRect(
+        4,
+        0,
+        24,
+        10
+    );
+
+    /* دست‌ها */
+
+    ctx.strokeStyle=f.color;
+    ctx.lineWidth=15;
+    ctx.lineCap='round';
+
+    let armAngle=0;
+
+    if(
+        f.attack>0
+    ){
+
+        armAngle=
+            f.attackType===2
+            ? -.2
+            : -.8;
+    }
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        -25,
+        -92
+    );
+
+    ctx.lineTo(
+        -45,
+        -65
+    );
+
+    ctx.stroke();
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        25,
+        -92
+    );
+
+    if(
+        f.attack>0
+    ){
+
+        ctx.lineTo(
+            70,
+            -90
+        );
+
+    }else{
+
+        ctx.lineTo(
+            45,
+            -65
+        );
+    }
+
+    ctx.stroke();
+
+    /* مشت */
+
+    ctx.fillStyle='#e0a080';
+
+    ctx.beginPath();
+
+    ctx.arc(
+        f.attack>0
+        ? 70
+        : 45,
+        f.attack>0
+        ? -90
+        : -65,
+        10,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* دفاع */
+
+    if(f.block){
+
+        ctx.strokeStyle='#00d9ff';
+
+        ctx.lineWidth=5;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            0,
+            -85,
+            55,
+            -1.8,
+            1.8
+        );
+
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+/* =====================================================
+   DRAW PARTICLES
+===================================================== */
+
+function drawParticles(){
+
+    for(
+        const p of particles
+    ){
+
+        ctx.fillStyle=
+            '#ffd84d';
+
+        ctx.globalAlpha=
+            Math.max(
+                0,
+                p.life
+            );
+
+        ctx.fillRect(
+            p.x,
+            p.y,
+            5,
+            5
+        );
+    }
+
+    ctx.globalAlpha=1;
+}
+
+/* =====================================================
+   DRAW TEXTS
+===================================================== */
+
+function drawHitTexts(){
+
+    ctx.textAlign='center';
+
+    for(
+        const t of hitTexts
+    ){
+
+        ctx.globalAlpha=
+            Math.min(
+                1,
+                t.life*2
+            );
+
+        ctx.fillStyle='#fff';
+
+        ctx.font=
+            'bold 25px Tahoma';
+
+        ctx.fillText(
+            t.text,
+            t.x,
+            t.y
+        );
+    }
+
+    ctx.globalAlpha=1;
+}
+
+/* =====================================================
+   DRAW
+===================================================== */
+
+function draw(){
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    ctx.save();
+
+    if(shake>0){
+
+        ctx.translate(
+            (Math.random()-.5)*
+            shake,
+            (Math.random()-.5)*
+            shake
+        );
+
+        shake*=.85;
+    }
+
+    drawBackground();
+
+    drawFighter(player);
+
+    drawFighter(enemy);
+
+    drawParticles();
+
+    drawHitTexts();
+
+    ctx.restore();
+}
+
+/* =====================================================
+   HUD UPDATE
+===================================================== */
+
+function updateHUD(){
+
+    document
+    .getElementById('pHP')
+    .style.width=
+        Math.max(
+            0,
+            playerHP
+        )+'%';
+
+    document
+    .getElementById('eHP')
+    .style.width=
+        Math.max(
+            0,
+            enemyHP
+        )+'%';
+
+    document
+    .getElementById('specialFill')
+    .style.width=
+        special+'%';
+
+    const comboEl=
+        document.getElementById(
+            'combo'
+        );
+
+    if(combo>=2){
+
+        comboEl.textContent=
+            '🔥 COMBO x'+combo;
+
+        comboEl.style.opacity='1';
+
+    }else{
+
+        comboEl.style.opacity='0';
+    }
+
+    document
+    .getElementById(
+        'specialText'
+    )
+    .textContent=
+        special>=100
+        ? '⚡ قدرت ویژه آماده است! U'
+        : '⚡ قدرت ویژه '+
+          Math.floor(special)+
+          '%';
+}
+
+/* =====================================================
+   FINISH
+===================================================== */
+
+function finish(){
+
+    if(gameOver)
+        return;
+
+    gameOver=true;
+    running=false;
+
+    clearInterval(timerID);
+
+    let title;
+
+    if(
+        playerHP>enemyHP
+    )
+        title='🏆 تو برنده شدی!';
+
+    else if(
+        enemyHP>playerHP
+    )
+        title='🤖 حریف برنده شد';
+
+    else
+        title='🤝 مساوی شد';
+
+    document
+    .getElementById(
+        'resultTitle'
+    )
+    .textContent=
+        title;
+
+    document
+    .getElementById(
+        'resultText'
+    )
+    .innerHTML=
+        '❤️ جان تو: <b>'+
+        Math.max(
+            0,
+            Math.round(playerHP)
+        )+
+        '</b><br><br>'+
+        '❤️ جان حریف: <b>'+
+        Math.max(
+            0,
+            Math.round(enemyHP)
+        )+
+        '</b>';
+
+    document
+    .getElementById(
+        'result'
+    )
+    .style.display='flex';
+}
+
+/* =====================================================
+   GAME LOOP
+===================================================== */
+
+function loop(){
+
+    if(!running)
+        return;
+
+    update();
+
+    draw();
+
+    requestAnimationFrame(
+        loop
+    );
+}
+
+</script>
+
+</body>
+</html>
+```

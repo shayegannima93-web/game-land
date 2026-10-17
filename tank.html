@@ -1,0 +1,538 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GameLand Tank V19</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#101820;color:#fff;font-family:Tahoma,Arial,sans-serif}
+#game{position:fixed;inset:0}
+button{font-family:inherit;cursor:pointer;background:#24384b;color:#fff;border:1px solid #627b91;border-radius:8px;padding:9px 13px;font-weight:bold}
+button:hover{background:#17664f}
+button:disabled{opacity:.4;cursor:not-allowed}
+#hud{position:fixed;inset:0;pointer-events:none;display:none}
+.panel{background:#101a28eF;border:1px solid #52677c;border-radius:12px;padding:12px}
+#stats{position:absolute;top:12px;right:12px;width:220px;line-height:1.9}
+#health{height:12px;background:#542b2b;border-radius:8px;overflow:hidden}
+#healthbar{height:100%;width:100%;background:#45e09b}
+#buttons{position:absolute;left:12px;top:12px;display:flex;gap:6px;pointer-events:auto}
+#message{position:absolute;top:24%;left:50%;transform:translateX(-50%);font-size:22px;font-weight:bold;text-shadow:0 2px 8px black;text-align:center;max-width:90%;white-space:pre-line}
+#help{position:absolute;right:12px;bottom:12px;font-size:12px;line-height:2}
+#minimap{position:absolute;left:12px;bottom:12px;width:135px;height:135px;background:#1a2c24;border:1px solid #b5c5b8;border-radius:7px}
+#menu{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:15px;background:radial-gradient(ellipse at top,#273d4d,#070b12 75%);overflow:auto}
+#box{width:min(950px,100%);max-height:95vh;overflow:auto;padding:22px;border:1px solid #526a80;background:#101a28f5;border-radius:18px}
+h1{margin:0;color:#6cebb5;font-size:clamp(25px,4vw,40px)}
+h2{font-size:17px;color:#91d6ff;margin:22px 0 10px}
+p{line-height:1.8}
+.small{font-size:12px;color:#afbdcc;line-height:1.9}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.card{background:#1b2a3b;border:1px solid #465d73;border-radius:11px;padding:12px;text-align:center}
+.card.selected{border:2px solid #61e8b0}
+.card h3{font-size:15px;margin:5px 0 10px}
+.card p{font-size:12px;margin:5px 0;color:#c1cbd6}
+.card button{width:100%;margin-top:7px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.row button{flex:1}
+.primary{background:#087d5c;border-color:#38c99b}
+.danger{background:#682e2e}
+.upgrade{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid #34495b}
+.upgrade button{min-width:120px}
+#mobile{position:absolute;left:50%;bottom:15px;transform:translateX(-50%);display:none;gap:5px;pointer-events:auto}
+#mobile button{width:46px;height:46px;padding:5px;font-size:18px}
+@media(max-width:650px){
+ #box{padding:14px}#help{display:none}#stats{width:180px;font-size:12px}
+ #minimap{width:100px;height:100px}#mobile{display:flex}
+}
+</style>
+</head>
+<body>
+<div id="game"></div>
+
+<div id="hud">
+ <div id="stats" class="panel">
+  <b id="tankLabel">تانک متوسط</b><br>
+  موج: <b id="wave">1</b> | امتیاز: <b id="score">0</b><br>
+  سکه: <b id="coins">0</b><br>
+  سلامتی: <b id="hp">100</b>
+  <div id="health"><div id="healthbar"></div></div>
+  مهمات: <b id="ammo">12</b> / 12<br>
+  قطعات: <b id="parts">سالم</b>
+ </div>
+ <div id="buttons">
+  <button id="pauseBtn">⏸ توقف</button>
+  <button id="repairBtn">🔧 تعمیر</button>
+  <button id="menuBtn">☰ منو</button>
+ </div>
+ <div id="message"></div>
+ <canvas id="minimap" width="135" height="135"></canvas>
+ <div id="help" class="panel">
+  W A S D حرکت · موس نشانه‌گیری<br>
+  کلیک چپ یا Space شلیک<br>
+  R پرکردن مهمات · E تعمیر قطعات<br>
+  Shift حرکت سریع
+ </div>
+ <div id="mobile">
+  <button data-key="w">▲</button>
+  <button data-key="a">◀</button>
+  <button data-key="s">▼</button>
+  <button data-key="d">▶</button>
+  <button id="mobileFire">🔥</button>
+ </div>
+</div>
+
+<div id="menu">
+ <div id="box">
+  <h1>GAMELAND TANK V19</h1>
+  <p class="small">نبرد تانک‌ها · نقشه بزرگ · گاراژ · ارتقا · آسیب قطعات · دشمنان هوشمند</p>
+  <div class="row">
+   <div class="panel">💰 سکه: <b id="menuCoins">0</b></div>
+   <div class="panel">🏆 بهترین موج: <b id="bestWave">0</b></div>
+  </div>
+  <h2>۱. گاراژ تانک‌ها</h2>
+  <div id="tankCards" class="grid"></div>
+  <h2>۲. انتخاب نقشه</h2>
+  <div id="mapCards" class="grid"></div>
+  <h2>۳. ارتقای تانک</h2>
+  <div class="panel"><div id="upgradeList"></div></div>
+  <div class="row">
+   <button id="garageRepair">تعمیر کامل — ۳۰ سکه</button>
+   <button id="resetSave" class="danger">پاک‌کردن ذخیره</button>
+  </div>
+  <h2>۴. شروع نبرد</h2>
+  <div class="row">
+   <button id="startBtn" class="primary">🚀 شروع بازی</button>
+   <button id="resumeBtn">▶ ادامه بازی</button>
+  </div>
+  <p class="small">اگر بازی بارگذاری نشد، اینترنت را بررسی کن؛ موتور سه‌بعدی از CDN بارگیری می‌شود.</p>
+  <p id="error" class="small" style="color:#ff9999"></p>
+ </div>
+</div>
+
+<script type="module">
+const $=id=>document.getElementById(id);
+try{
+ const THREE=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+ startApp(THREE);
+}catch(e){
+ $('error').textContent='خطا در بارگذاری Three.js: '+e.message;
+}
+
+function startApp(THREE){
+const TANKS=[
+ {id:'light',name:'تانک سبک',price:0,hp:100,speed:9,damage:18,reload:500,color:0x5d9a61,desc:'سریع و چابک'},
+ {id:'medium',name:'تانک متوسط',price:0,hp:140,speed:6,damage:26,reload:750,color:0xafa06a,desc:'متعادل و مناسب شروع'},
+ {id:'heavy',name:'تانک سنگین',price:180,hp:240,speed:3.8,damage:42,reload:1100,color:0x6a7b86,desc:'زره و سلامتی بالا'},
+ {id:'hunter',name:'شکارچی',price:300,hp:125,speed:5.4,damage:55,reload:1300,color:0x76638b,desc:'گلوله قدرتمند'},
+ {id:'rapid',name:'تندرو',price:380,hp:115,speed:7.4,damage:14,reload:260,color:0x8a9a48,desc:'سرعت شلیک بالا'},
+ {id:'assault',name:'تهاجمی',price:550,hp:180,speed:5.2,damage:35,reload:620,color:0x9a5744,desc:'مناسب نبردهای سنگین'}
+];
+const MAPS=[
+ {id:'desert',name:'بیابان',color:0xb7a06d},
+ {id:'forest',name:'جنگل',color:0x4e7048},
+ {id:'city',name:'شهر متروکه',color:0x686e78},
+ {id:'base',name:'پایگاه نظامی',color:0x64735c}
+];
+const UPG=[
+ {id:'armor',name:'زره تقویتی',desc:'افزایش سلامتی',cost:80,max:5},
+ {id:'cannon',name:'توپ قوی‌تر',desc:'افزایش آسیب گلوله',cost:100,max:5},
+ {id:'engine',name:'موتور بهتر',desc:'افزایش سرعت',cost:75,max:5},
+ {id:'reload',name:'بارگذاری سریع',desc:'شلیک سریع‌تر',cost:110,max:5}
+];
+const fresh=()=>({coins:200,best:0,unlocked:['light','medium'],tank:'medium',map:'desert',upgrades:{armor:0,cannon:0,engine:0,reload:0}});
+let save;
+try{save={...fresh(),...JSON.parse(localStorage.getItem('gamelandV19')||'{}')};save.upgrades={...fresh().upgrades,...save.upgrades};}
+catch{save=fresh()}
+if(!Array.isArray(save.unlocked))save.unlocked=['light','medium'];
+let tankId=save.tank||'medium',mapId=save.map||'desert';
+let renderer,scene,camera,clock,world,player;
+let enemies=[],shots=[],particles=[],obstacles=[];
+let running=false,paused=false,over=false;
+let x=0,z=0,angle=0,aimX=0,aimZ=-20,hp=100,ammo=12,score=0,wave=1;
+let keys={},lastShot=0,fireHeld=false,spawnTimer=0,spawnLeft=0,raf=0,msgTimer;
+const mini=$('minimap'),ctx=mini.getContext('2d');
+const tank=()=>TANKS.find(t=>t.id===tankId)||TANKS[1];
+const map=()=>MAPS.find(m=>m.id===mapId)||MAPS[0];
+const lv=id=>save.upgrades[id]||0;
+function persist(){localStorage.setItem('gamelandV19',JSON.stringify(save));updateMoney()}
+function updateMoney(){
+ $('coins').textContent=save.coins;$('menuCoins').textContent=save.coins;
+ $('bestWave').textContent=save.best;
+}
+function renderMenu(){
+ $('tankCards').innerHTML=TANKS.map(t=>{
+ const unlocked=save.unlocked.includes(t.id);
+ return `<div class="card ${t.id===tankId?'selected':''}">
+ <h3>${t.name}</h3><p>${t.desc}</p>
+ <p>سلامتی ${t.hp} · قدرت ${t.damage}</p><p>سرعت ${t.speed}</p>
+ <button data-tank="${t.id}">${unlocked?(t.id===tankId?'انتخاب شده':'انتخاب'):('خرید · '+t.price+' سکه')}</button></div>`;
+ }).join('');
+ $('mapCards').innerHTML=MAPS.map(m=>`<div class="card ${m.id===mapId?'selected':''}">
+ <h3>${m.name}</h3><p>نقشه بزرگ ۳۰۰×۳۰۰</p>
+ <button data-map="${m.id}">${m.id===mapId?'انتخاب شده':'انتخاب نقشه'}</button></div>`).join('');
+ $('upgradeList').innerHTML=UPG.map(u=>{
+ const n=lv(u.id),cost=u.cost*(n+1);
+ return `<div class="upgrade"><div><b>${u.name}</b><div class="small">${u.desc} · سطح ${n}/${u.max}</div></div>
+ <button data-up="${u.id}" ${n>=u.max?'disabled':''}>${n>=u.max?'حداکثر':cost+' سکه'}</button></div>`;
+ }).join('');
+ updateMoney();
+}
+$('tankCards').onclick=e=>{
+ const b=e.target.closest('[data-tank]');if(!b)return;
+ const t=TANKS.find(t=>t.id===b.dataset.tank);
+ if(!save.unlocked.includes(t.id)){
+  if(save.coins<t.price){show('سکه کافی نیست');return}
+  save.coins-=t.price;save.unlocked.push(t.id);
+ }
+ tankId=t.id;save.tank=t.id;persist();renderMenu();
+};
+$('mapCards').onclick=e=>{
+ const b=e.target.closest('[data-map]');if(!b)return;
+ mapId=b.dataset.map;save.map=mapId;persist();renderMenu();
+};
+$('upgradeList').onclick=e=>{
+ const b=e.target.closest('[data-up]');if(!b)return;
+ const u=UPG.find(u=>u.id===b.dataset.up),n=lv(u.id),cost=u.cost*(n+1);
+ if(n>=u.max||save.coins<cost){show('سکه کافی نیست یا ارتقا کامل است');return}
+ save.coins-=cost;save.upgrades[u.id]=n+1;persist();renderMenu();
+};
+$('garageRepair').onclick=()=>{
+ if(save.coins<30){show('۳۰ سکه برای تعمیر لازم است');return}
+ save.coins-=30;persist();if(player){hp=maxHp();updateHUD()}renderMenu();
+};
+$('resetSave').onclick=()=>{
+ if(confirm('تمام ذخیره‌های V19 پاک شوند؟')){
+  save=fresh();tankId='medium';mapId='desert';persist();renderMenu();
+ }
+};
+$('startBtn').onclick=()=>startGame();
+$('resumeBtn').onclick=()=>{
+ if(!renderer||!player){startGame();return}
+ $('menu').style.display='none';over=false;paused=false;running=true;
+ clock.getDelta();loop();
+};
+$('menuBtn').onclick=()=>{
+ running=false;paused=true;$('menu').style.display='flex';renderMenu();
+};
+$('pauseBtn').onclick=()=>{
+ if(!renderer)return;
+ paused=!paused;running=!paused;
+ $('pauseBtn').textContent=paused?'▶ ادامه':'⏸ توقف';
+ if(!paused){clock.getDelta();loop()}
+};
+$('repairBtn').onclick=repairParts;
+function show(s){
+ $('message').textContent=s;clearTimeout(msgTimer);
+ msgTimer=setTimeout(()=>$('message').textContent='',2200);
+}
+function mat(c,r=.8,m=.05){return new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m})}
+function add(g,m,x,y,z,parent=world){
+ const o=new THREE.Mesh(g,m);o.position.set(x,y,z);
+ o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;
+}
+function box(x,y,z,w,h,d,c,parent=world){
+ return add(new THREE.BoxGeometry(w,h,d),mat(c),x,y,z,parent);
+}
+function cylinder(x,y,z,rt,rb,h,c,parent=world){
+ return add(new THREE.CylinderGeometry(rt,rb,h,12),mat(c),x,y,z,parent);
+}
+function makeTank(color){
+ const g=new THREE.Group(),bodyMat=mat(color,.7,.15),dark=mat(0x20272d,.9);
+ add(new THREE.BoxGeometry(2.6,.85,3.5),bodyMat,0,.8,0,g);
+ for(const s of [-1,1]){
+  add(new THREE.BoxGeometry(.5,.72,3.8),dark,s*1.45,.52,0,g);
+  for(let i=0;i<5;i++){
+   const w=add(new THREE.CylinderGeometry(.24,.24,.16,12),mat(0x4a5459),s*1.72,.46,-1.4+i*.68,g);
+   w.rotation.z=Math.PI/2;
+  }
+ }
+ const pivot=new THREE.Group();pivot.position.set(0,1.25,0);g.add(pivot);
+ add(new THREE.CylinderGeometry(.8,.9,.45,16),bodyMat,0,0,0,pivot);
+ add(new THREE.BoxGeometry(1.35,.55,1.5),bodyMat,0,.24,-.15,pivot);
+ const barrel=add(new THREE.CylinderGeometry(.13,.18,2.7,12),mat(0x35434b,.35,.6),0,.35,-1.55,pivot);
+ barrel.rotation.x=Math.PI/2;
+ const flash=add(new THREE.SphereGeometry(.25,8,8),mat(0xffc04b),0,.35,-2.9,pivot);flash.visible=false;
+ g.userData={pivot,flash,bodyMat};
+ return g;
+}
+function maxHp(){return tank().hp+lv('armor')*22}
+function clearWorld(){
+ if(world)scene.remove(world);
+ world=new THREE.Group();scene.add(world);
+ enemies=[];shots=[];particles=[];obstacles=[];
+}
+function buildMap(){
+ const m=map();
+ scene.background=new THREE.Color(m.color);
+ scene.fog=new THREE.Fog(m.color,90,280);
+ const ground=add(new THREE.PlaneGeometry(320,320),mat(m.color),0,-.16,0);
+ ground.rotation.x=-Math.PI/2;
+ const grid=new THREE.GridHelper(320,64,0x8b8b83,0x666b65);
+ grid.position.y=-.14;world.add(grid);
+ box(0,1,-160,320,2,2,0x424a50);
+ box(0,1,160,320,2,2,0x424a50);
+ box(-160,1,0,2,2,320,0x424a50);
+ box(160,1,0,2,2,320,0x424a50);
+ for(let i=0;i<90;i++){
+  const ox=(Math.random()-.5)*270,oz=(Math.random()-.5)*270;
+  if(Math.hypot(ox,oz)<19)continue;
+  if(mapId==='forest'){
+   cylinder(ox,.9,oz,.25,.4,1.8,0x60452e);
+   add(new THREE.ConeGeometry(1.8,4.5,8),mat(Math.random()<.5?0x285b35:0x397344),ox,3.8,oz);
+   obstacles.push({x:ox,z:oz,r:1.6});
+  }else if(mapId==='city'){
+   const h=4+Math.random()*8;
+   box(ox,h/2,oz,5+Math.random()*3,h,5+Math.random()*3,0x5b6570);
+   obstacles.push({x:ox,z:oz,r:4});
+  }else if(mapId==='base'){
+   box(ox,.8,oz,3,1.6,3,0x7a865f);
+   box(ox,1.65,oz,3.1,.12,3.1,0x39443a);
+   obstacles.push({x:ox,z:oz,r:2.3});
+  }else{
+   const rock=add(new THREE.DodecahedronGeometry(1.5+Math.random()*1.2),mat(0x827a69),ox,.8,oz);
+   rock.scale.set(1.4,.9,1.2);obstacles.push({x:ox,z:oz,r:2.4});
+  }
+ }
+ for(let i=0;i<12;i++){
+  const a=i*Math.PI/6,ox=Math.cos(a)*17,oz=Math.sin(a)*17;
+  box(ox,.65,oz,4,1.3,2,0x555e60);
+  obstacles.push({x:ox,z:oz,r:2.3});
+ }
+}
+function initRenderer(){
+ if(renderer){
+  cancelAnimationFrame(raf);renderer.dispose();renderer.domElement.remove();renderer=null;
+ }
+ renderer=new THREE.WebGLRenderer({antialias:true});
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
+ renderer.setSize(innerWidth,innerHeight);
+ renderer.shadowMap.enabled=true;
+ renderer.outputColorSpace=THREE.SRGBColorSpace;
+ renderer.toneMapping=THREE.ACESFilmicToneMapping;
+ renderer.toneMappingExposure=1.1;
+ $('game').innerHTML='';$('game').appendChild(renderer.domElement);
+ scene=new THREE.Scene();clock=new THREE.Clock();
+ camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,500);
+ scene.add(new THREE.HemisphereLight(0xd9e9ff,0x554733,2.0));
+ const sun=new THREE.DirectionalLight(0xffe0ad,3);
+ sun.position.set(-45,70,35);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+}
+function startGame(){
+ try{
+  initRenderer();clearWorld();buildMap();
+  x=0;z=0;angle=0;hp=maxHp();ammo=12;score=0;wave=1;over=false;paused=false;
+  player=makeTank(tank().color);world.add(player);
+  spawnWave();
+  $('menu').style.display='none';$('hud').style.display='block';
+  $('pauseBtn').textContent='⏸ توقف';
+  running=true;clock.start();updateHUD();loop();
+  $('error').textContent='';
+ }catch(e){$('error').textContent='خطا در ساخت بازی: '+e.message}
+}
+function spawnWave(){
+ spawnLeft=Math.min(4+wave*2,18);spawnTimer=.3;
+ show('موج '+wave+' شروع شد!');
+}
+function spawnEnemy(){
+ const a=Math.random()*Math.PI*2,d=50+Math.random()*65;
+ const ex=Math.cos(a)*d,ez=Math.sin(a)*d;
+ const r=Math.random();
+ const type=r<.22?'fast':r<.45?'heavy':r<.68?'sniper':'normal';
+ const colors={fast:0xb17a44,heavy:0x69575b,sniper:0x575b94,normal:0xa04d45};
+ const obj=makeTank(colors[type]);obj.position.set(ex,0,ez);world.add(obj);
+ const base={fast:38,heavy:115,sniper:55,normal:65}[type];
+ enemies.push({obj,x:ex,z:ez,type,hp:base+wave*12,speed:({fast:6,heavy:2,sniper:2.8,normal:3.5})[type],last:performance.now()+Math.random()*1000,phase:Math.random()*5});
+}
+function shoot(){
+ if(!running||paused||over||!player||ammo<=0)return;
+ const rate=tank().reload*Math.max(.45,1-lv('reload')*.1)*(player.userData.turretBroken?1.8:1);
+ if(performance.now()-lastShot<rate)return;
+ lastShot=performance.now();ammo--;
+ const dx=aimX-x,dz=aimZ-z,len=Math.hypot(dx,dz)||1;
+ const vx=dx/len,vz=dz/len;
+ const dmg=(tank().damage+lv('cannon')*9);
+ const startX=x+vx*2.7,startZ=z+vz*2.7;
+ const obj=add(new THREE.SphereGeometry(.18,10,8),mat(0xffd27a,.25,.2),startX,1.5,startZ);
+ shots.push({obj,x:startX,z:startZ,dx:vx,dz:vz,life:3,enemy:false,damage:dmg});
+ player.userData.flash.visible=true;
+ setTimeout(()=>{if(player?.userData.flash)player.userData.flash.visible=false},65);
+ burst(startX,1.5,startZ,0xffb64b,5);
+ updateHUD();
+}
+function enemyShoot(e){
+ const dx=x-e.x,dz=z-e.z,len=Math.hypot(dx,dz)||1;
+ const obj=add(new THREE.SphereGeometry(.16,8,8),mat(0xff5148,.3),e.x,1.5,e.z);
+ shots.push({obj,x:e.x,z:e.z,dx:dx/len,dz:dz/len,life:3,enemy:true,damage:e.type==='heavy'?18:e.type==='sniper'?20:11});
+ e.last=performance.now()+({fast:950,heavy:1900,sniper:2200,normal:1500})[e.type];
+}
+function burst(x,y,z,color,n=15){
+ for(let i=0;i<n;i++){
+  const o=add(new THREE.SphereGeometry(.08+Math.random()*.15,6,5),mat(color),x,y,z);
+  particles.push({obj:o,life:.5+Math.random()*.5,vx:(Math.random()-.5)*9,vy:Math.random()*7,vz:(Math.random()-.5)*9});
+ }
+}
+function explosion(x,z){
+ burst(x,.8,z,0xff6a2f,26);burst(x,1,z,0xffcf5b,13);
+ const light=new THREE.PointLight(0xff6b28,6,15);light.position.set(x,2,z);world.add(light);
+ setTimeout(()=>world?.remove(light),180);
+}
+function updateParts(){
+ $('parts').textContent=player?.userData.trackBroken?'زنجیر خراب':player?.userData.turretBroken?'توپ خراب':'سالم';
+}
+function damagePlayer(dmg){
+ hp-=dmg;
+ if(Math.random()<.16)player.userData.trackBroken=true;
+ else if(Math.random()<.18)player.userData.turretBroken=true;
+ if(hp<=0){
+  hp=0;over=true;running=false;
+  save.best=Math.max(save.best,wave);persist();
+  show('تانک نابود شد!\nاز منو می‌توانی دوباره شروع کنی');
+ }
+ updateHUD();updateParts();
+}
+function repairParts(){
+ if(!running||paused||over)return;
+ const damaged=player.userData.trackBroken||player.userData.turretBroken;
+ if(!damaged){show('قطعات سالم هستند');return}
+ if(save.coins<25){show('برای تعمیر ۲۵ سکه لازم است');return}
+ save.coins-=25;player.userData.trackBroken=false;player.userData.turretBroken=false;
+ persist();updateHUD();updateParts();show('قطعات تعمیر شدند');
+}
+function updatePlayer(dt){
+ const f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);
+ const r=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
+ angle+=r*dt*1.9;
+ let speed=(tank().speed+lv('engine')*.65)*(player.userData.trackBroken?.48:1);
+ if(keys.shift)speed*=1.25;
+ x+=Math.sin(angle)*f*speed*dt;z-=Math.cos(angle)*f*speed*dt;
+ x=Math.max(-154,Math.min(154,x));z=Math.max(-154,Math.min(154,z));
+ for(const o of obstacles){
+  const dx=x-o.x,dz=z-o.z,d=Math.hypot(dx,dz),min=o.r+1.6;
+  if(d<min&&d>.01){x=o.x+dx/d*min;z=o.z+dz/d*min}
+ }
+ player.position.set(x,0,z);player.rotation.y=angle;
+ const target=Math.atan2(-(aimX-x),-(aimZ-z));
+ let diff=((target-angle+Math.PI*3)%(Math.PI*2))-Math.PI;
+ player.userData.pivot.rotation.y=diff;
+ if(fireHeld)shoot();
+}
+function updateEnemies(dt){
+ for(const e of [...enemies]){
+  const dx=x-e.x,dz=z-e.z,d=Math.hypot(dx,dz)||1;
+  e.phase+=dt;
+  if(e.type==='sniper'){
+   if(d>40){e.x+=dx/d*e.speed*dt;e.z+=dz/d*e.speed*dt}
+   else if(d<24){e.x-=dx/d*e.speed*dt;e.z-=dz/d*e.speed*dt}
+   else {e.x+=dz/d*Math.sin(e.phase)*.5*dt;e.z-=dx/d*Math.sin(e.phase)*.5*dt}
+  }else if(d>(e.type==='heavy'?10:13)){
+   e.x+=dx/d*e.speed*dt;e.z+=dz/d*e.speed*dt;
+  }else{
+   e.x+=dz/d*Math.sin(e.phase)*.8*dt;e.z-=dx/d*Math.sin(e.phase)*.8*dt;
+  }
+  e.obj.position.set(e.x,0,e.z);e.obj.rotation.y=Math.atan2(dx,-dz);
+  e.obj.userData.pivot.rotation.y=Math.atan2(-dx,-dz);
+  if(d<90&&performance.now()>e.last)enemyShoot(e);
+ }
+ if(spawnLeft>0){
+  spawnTimer-=dt;
+  if(spawnTimer<=0){spawnEnemy();spawnLeft--;spawnTimer=Math.max(.4,1.2-wave*.025)}
+ }else if(enemies.length===0&&!over){
+  wave++;save.best=Math.max(save.best,wave);persist();spawnWave();
+ }
+}
+function updateShots(dt){
+ for(const b of [...shots]){
+  b.x+=b.dx*45*dt;b.z+=b.dz*45*dt;b.life-=dt;
+  b.obj.position.set(b.x,1.5,b.z);
+  let hit=false;
+  if(b.enemy){
+   if(Math.hypot(x-b.x,z-b.z)<2.1){damagePlayer(b.damage);explosion(b.x,b.z);hit=true}
+  }else{
+   for(const e of [...enemies]){
+    if(Math.hypot(e.x-b.x,e.z-b.z)<2){
+     e.hp-=b.damage;burst(b.x,1.3,b.z,0xffc26a,5);hit=true;
+     if(e.hp<=0){
+      explosion(e.x,e.z);world.remove(e.obj);enemies=enemies.filter(q=>q!==e);
+      score+=100;save.coins+=8+Math.floor(wave*1.5);persist();
+     }
+     break;
+    }
+   }
+  }
+  if(hit||b.life<=0||Math.abs(b.x)>170||Math.abs(b.z)>170){
+   world.remove(b.obj);shots=shots.filter(q=>q!==b);
+  }
+ }
+}
+function updateParticles(dt){
+ for(const p of [...particles]){
+  p.life-=dt;p.obj.position.x+=p.vx*dt;p.obj.position.y+=p.vy*dt;p.obj.position.z+=p.vz*dt;
+  p.vy-=8*dt;p.obj.scale.multiplyScalar(Math.max(.01,1-dt*1.5));
+  if(p.life<=0){world.remove(p.obj);particles=particles.filter(q=>q!==p)}
+ }
+}
+function updateCamera(dt){
+ const desired=new THREE.Vector3(x-Math.sin(angle)*10,7.5,z+Math.cos(angle)*10);
+ camera.position.lerp(desired,Math.min(1,dt*4));camera.lookAt(x,1,z);
+}
+function updateHUD(){
+ $('tankLabel').textContent=tank().name;$('wave').textContent=wave;
+ $('score').textContent=score;$('hp').textContent=Math.ceil(hp);
+ $('healthbar').style.width=Math.max(0,hp/maxHp()*100)+'%';
+ $('ammo').textContent=ammo;$('coins').textContent=save.coins;
+}
+function drawMap(){
+ ctx.clearRect(0,0,135,135);ctx.fillStyle='#24392e';ctx.fillRect(0,0,135,135);
+ const px=a=>(a+160)/320*135;
+ ctx.fillStyle='#b3b6a4';
+ for(const o of obstacles)ctx.fillRect(px(o.x)-1.5,px(o.z)-1.5,3,3);
+ ctx.fillStyle='#ff5e55';
+ for(const e of enemies){ctx.beginPath();ctx.arc(px(e.x),px(e.z),3,0,7);ctx.fill()}
+ ctx.fillStyle='#62ffc0';ctx.beginPath();ctx.arc(px(x),px(z),4,0,7);ctx.fill();
+}
+function loop(){
+ if(!renderer)return;
+ raf=requestAnimationFrame(loop);
+ if(running&&!paused&&!over){
+  const dt=Math.min(clock.getDelta(),.04);
+  updatePlayer(dt);updateEnemies(dt);updateShots(dt);updateParticles(dt);
+  updateCamera(dt);drawMap();updateHUD();
+ }else{clock.getDelta()}
+ renderer.render(scene,camera);
+}
+document.addEventListener('keydown',e=>{
+ const k=e.key.toLowerCase();keys[k]=true;
+ if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();
+ if(k===' '){shoot()}
+ if(k==='r'){ammo=12;updateHUD();show('مهمات پر شد')}
+ if(k==='e')repairParts();
+ if(k==='escape'&&renderer&&$('menu').style.display==='none')$('menuBtn').click();
+});
+document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+document.addEventListener('mousedown',e=>{if(e.button===0){fireHeld=true;shoot()}});
+document.addEventListener('mouseup',e=>{if(e.button===0)fireHeld=false});
+$('mobileFire').addEventListener('touchstart',e=>{e.preventDefault();fireHeld=true;shoot()},{passive:false});
+$('mobileFire').addEventListener('touchend',()=>fireHeld=false);
+document.querySelectorAll('[data-key]').forEach(b=>{
+ const k=b.dataset.key;
+ b.addEventListener('touchstart',e=>{e.preventDefault();keys[k]=true},{passive:false});
+ b.addEventListener('touchend',e=>{e.preventDefault();keys[k]=false},{passive:false});
+ b.addEventListener('touchcancel',()=>keys[k]=false);
+});
+$('game').addEventListener('mousemove',e=>{
+ if(!camera||!renderer)return;
+ const r=renderer.domElement.getBoundingClientRect();
+ const mouse=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
+ const ray=new THREE.Raycaster();ray.setFromCamera(mouse,camera);
+ const plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),p=new THREE.Vector3();
+ if(ray.ray.intersectPlane(plane,p)){aimX=p.x;aimZ=p.z}
+});
+window.addEventListener('resize',()=>{
+ if(renderer&&camera){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}
+});
+renderMenu();updateMoney();
+}
+</script>
+</body>
+</html>
